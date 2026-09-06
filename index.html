@@ -16,6 +16,9 @@
             align-items: center;
             overflow-x: hidden;
             position: relative;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         #bgVideo {
@@ -23,6 +26,7 @@
             top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover;
             z-index: -2;
+            display: none;
         }
 
         .bg-overlay {
@@ -40,24 +44,23 @@
             z-index: 50;
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(15, 23, 42, 0.6);
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(10px);
             padding: 8px 14px;
             border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 13px;
         }
 
-        .top-right-bar button {
-            background: transparent;
+        .top-right-bar a, .top-right-bar span, .top-right-bar button {
             color: #fff;
+            text-decoration: none;
+            background: transparent;
             border: none;
-            font-size: 13px;
             cursor: pointer;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            font-family: inherit;
         }
 
         .top-right-bar button:hover {
@@ -121,6 +124,7 @@
             justify-content: center;
             gap: 8px;
             margin-bottom: 6px;
+            flex-wrap: wrap;
         }
         @media(min-width: 600px) { .name-wrapper { justify-content: flex-start; } }
 
@@ -136,7 +140,6 @@
         }
         .badge-owner { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
         .badge-vip { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6); }
-        .badge-basic { background: rgba(255, 255, 255, 0.2); color: #e2e8f0; }
 
         .bio { font-size: 14px; color: #e2e8f0; margin-bottom: 20px; line-height: 1.4; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
 
@@ -217,7 +220,7 @@
 </head>
 <body>
 
-    <video id="bgVideo" autoplay muted loop playsinline style="display:none;">
+    <video id="bgVideo" autoplay muted loop playsinline>
         <source src="" type="video/mp4" id="videoSource">
     </video>
     <div class="bg-overlay"></div>
@@ -237,7 +240,7 @@
 
         <div class="right-section">
             <div class="name-wrapper">
-                <span class="badge" id="userBadge">BASIC</span>
+                <span class="badge" id="userBadge" style="display:none;"></span>
                 <div class="name" id="displayName">customcute</div>
             </div>
             <div class="bio" id="displayBio">Chào mừng bạn đến với trang cá nhân của tôi!</div>
@@ -302,6 +305,15 @@
                     <label>Tiểu sử (Bio)</label>
                     <input type="text" id="inputBio">
                 </div>
+
+                <div class="form-group" id="badgeConfigGroup" style="display:none;">
+                    <label>Hiển thị Huy hiệu Owner/VIP ở giữa?</label>
+                    <select id="inputShowBadge">
+                        <option value="yes">Hiển thị</option>
+                        <option value="no">Ẩn đi</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label>Chọn số lượng link muốn hiển thị</label>
                     <select id="linkCountSelect" onchange="renderLinkInputs()">
@@ -349,7 +361,7 @@
             { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner" }
         ];
         
-        let savedUsers = localStorage.getItem('usersDB_v7');
+        let savedUsers = localStorage.getItem('usersDB_v8');
         if (savedUsers) {
             try {
                 let parsed = JSON.parse(savedUsers);
@@ -359,9 +371,9 @@
                 usersDB = parsed;
             } catch(e) {}
         }
-        localStorage.setItem('usersDB_v7', JSON.stringify(usersDB));
+        localStorage.setItem('usersDB_v8', JSON.stringify(usersDB));
 
-        let loggedInUser = localStorage.getItem('loggedInUser_v7') || "Mrwenben";
+        let loggedInUser = localStorage.getItem('loggedInUser_v8') || "Mrwenben";
 
         function getUserRole(username) {
             let acc = usersDB.find(u => u.user === username);
@@ -371,7 +383,7 @@
         function getUserData(username) {
             let defaultData = {
                 name: "customcute",
-                bio: "Chào mừng bạn đến với trang cá nhân của tôi!",
+                bio: "bố nhân loại là tao",
                 links: [
                     { name: "Facebook", url: "https://facebook.com" },
                     { name: "Tiktok", url: "https://tiktok.com" },
@@ -381,9 +393,10 @@
                 music: "",
                 bg: "VID_SHOOTING",
                 customFile: "",
-                customFileType: ""
+                customFileType: "",
+                showBadge: "yes"
             };
-            let saved = localStorage.getItem('userData_v7_' + username);
+            let saved = localStorage.getItem('userData_v8_' + username);
             return saved ? JSON.parse(saved) : defaultData;
         }
 
@@ -393,32 +406,37 @@
             let role = getUserRole(loggedInUser);
             let badgeEl = document.getElementById('userBadge');
             
-            if(role === 'owner') {
-                badgeEl.innerText = "OWNER";
-                badgeEl.className = "badge badge-owner";
-            } else if(role === 'vip') {
-                badgeEl.innerText = "VIP";
-                badgeEl.className = "badge badge-vip";
+            if (role === 'owner' || role === 'vip') {
+                if (role === 'owner') {
+                    badgeEl.innerText = "OWNER";
+                    badgeEl.className = "badge badge-owner";
+                } else {
+                    badgeEl.innerText = "VIP";
+                    badgeEl.className = "badge badge-vip";
+                }
+                
+                if (siteData.showBadge === "no") {
+                    badgeEl.style.display = "none";
+                } else {
+                    badgeEl.style.display = "inline-block";
+                }
             } else {
-                badgeEl.innerText = "BASIC";
-                badgeEl.className = "badge badge-basic";
+                badgeEl.style.display = "none";
             }
 
             let topRightBar = document.getElementById('topRightBar');
             if(loggedInUser) {
                 topRightBar.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span class="badge ${badgeEl.className.replace('badge ', '')}">${badgeEl.innerText}</span>
-                        <span style="font-weight: 600; font-size: 13px; color: #fff;">${loggedInUser}</span>
-                        <button onclick="openEditForm()" title="Cấu hình" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; padding: 4px 8px; border-radius: 6px; color: #38bdf8;">⚙️</button>
-                        <button onclick="handleLogout()" title="Đăng xuất" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; padding: 4px 8px; border-radius: 6px; color: #ef4444;">🚪</button>
-                    </div>
+                    <span>${loggedInUser}</span>
+                    <button onclick="openEditForm()">Cấu hình</button>
+                    <span>/</span>
+                    <button onclick="handleLogout()">Đăng xuất</button>
                 `;
             } else {
                 topRightBar.innerHTML = `
-                    <button onclick="openAuthModal('login')">🔑 Đăng nhập</button>
-                    <span style="color: rgba(255,255,255,0.3)">|</span>
-                    <button onclick="openAuthModal('register')">✨ Đăng ký</button>
+                    <button onclick="openAuthModal('login')">Đăng nhập</button>
+                    <span>/</span>
+                    <button onclick="openAuthModal('register')">Đăng ký</button>
                 `;
             }
 
@@ -462,9 +480,10 @@
                     } else {
                         videoEl.style.display = "none";
                         document.body.style.backgroundImage = `url('${siteData.customFile}')`;
-                        document.body.style.backgroundSize = "cover";
-                        document.body.style.backgroundPosition = "center";
                     }
+                } else {
+                    videoEl.style.display = "none";
+                    document.body.style.backgroundImage = "none";
                 }
             } else if(videoUrls[bgVal]) {
                 videoEl.style.display = "block";
@@ -510,7 +529,7 @@
 
             if(found) {
                 loggedInUser = u;
-                localStorage.setItem('loggedInUser_v7', u);
+                localStorage.setItem('loggedInUser_v8', u);
                 siteData = getUserData(u);
                 updateUI();
                 closeModal();
@@ -521,7 +540,7 @@
 
         function handleLogout() {
             loggedInUser = "";
-            localStorage.removeItem('loggedInUser_v7');
+            localStorage.removeItem('loggedInUser_v8');
             updateUI();
         }
 
@@ -540,10 +559,10 @@
             }
 
             usersDB.push({ user: u, pass: p, role: "basic" });
-            localStorage.setItem('usersDB_v7', JSON.stringify(usersDB));
+            localStorage.setItem('usersDB_v8', JSON.stringify(usersDB));
             
             loggedInUser = u;
-            localStorage.setItem('loggedInUser_v7', u);
+            localStorage.setItem('loggedInUser_v8', u);
             siteData = getUserData(u);
             updateUI();
             closeModal();
@@ -560,6 +579,14 @@
             let role = getUserRole(loggedInUser);
             let ownerPanel = document.getElementById('ownerControlPanel');
             ownerPanel.style.display = (role === 'owner') ? 'block' : 'none';
+
+            let badgeConfigGroup = document.getElementById('badgeConfigGroup');
+            if (role === 'owner' || role === 'vip') {
+                badgeConfigGroup.style.display = 'block';
+                document.getElementById('inputShowBadge').value = siteData.showBadge || "yes";
+            } else {
+                badgeConfigGroup.style.display = 'none';
+            }
 
             document.getElementById('inputName').value = siteData.name;
             document.getElementById('inputBio').value = siteData.bio;
@@ -606,7 +633,7 @@
             let targetAcc = usersDB.find(u => u.user === targetName);
             if(targetAcc) {
                 targetAcc.role = 'vip';
-                localStorage.setItem('usersDB_v7', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v8', JSON.stringify(usersDB));
                 alert(`✅ Đã nâng cấp tài khoản ${targetName} lên VIP thành công!`);
             } else {
                 alert("❌ Không tìm thấy tên tài khoản này!");
@@ -618,6 +645,11 @@
             siteData.bio = document.getElementById('inputBio').value;
             siteData.bg = document.getElementById('inputBgSelect').value;
             siteData.music = document.getElementById('inputMusicUrl').value.trim();
+
+            let role = getUserRole(loggedInUser);
+            if (role === 'owner' || role === 'vip') {
+                siteData.showBadge = document.getElementById('inputShowBadge').value;
+            }
 
             let count = parseInt(document.getElementById('linkCountSelect').value);
             siteData.links = [];
@@ -634,14 +666,14 @@
                 reader.onload = function(e) {
                     siteData.customFile = e.target.result;
                     siteData.customFileType = file.type;
-                    localStorage.setItem('userData_v7_' + loggedInUser, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v8_' + loggedInUser, JSON.stringify(siteData));
                     updateUI();
                     closeModal();
                     alert("✅ Đã lưu thay đổi thành công!");
                 }
                 reader.readAsDataURL(file);
             } else {
-                localStorage.setItem('userData_v7_' + loggedInUser, JSON.stringify(siteData));
+                localStorage.setItem('userData_v8_' + loggedInUser, JSON.stringify(siteData));
                 updateUI();
                 closeModal();
                 alert("✅ Đã lưu thay đổi thành công!");
@@ -654,7 +686,7 @@
                 let reader = new FileReader();
                 reader.onload = function(e) {
                     siteData.avatar = e.target.result;
-                    localStorage.setItem('userData_v7_' + loggedInUser, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v8_' + loggedInUser, JSON.stringify(siteData));
                     updateUI();
                 }
                 reader.readAsDataURL(file);
