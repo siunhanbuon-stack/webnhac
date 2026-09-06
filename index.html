@@ -649,7 +649,10 @@
             let role = getUserRole(viewingUser);
             let container = document.getElementById('mainContainer');
 
-            if (viewingUser.toLowerCase() !== "mrwenben" && role !== 'vip' && role !== 'owner') {
+            let accInfo = usersDB.find(u => u.user.toLowerCase() === viewingUser.toLowerCase());
+            let isVipExpired = accInfo && accInfo.role === 'vip' && accInfo.expire && accInfo.expire < new Date().getTime();
+
+            if (isVipExpired) {
                 container.innerHTML = `
                     <div style="text-align: center; width: 100%;">
                         <div class="expired-notice">
@@ -860,6 +863,14 @@
         }
 
         function openEditForm() {
+            if (loggedInUser && viewingUser.toLowerCase() !== loggedInUser.toLowerCase()) {
+                let logRole = getUserRole(loggedInUser);
+                if (logRole !== 'owner') {
+                    window.location.hash = "#" + loggedInUser;
+                    return;
+                }
+            }
+
             if(!canEditCurrentPage()) {
                 alert("❌ Bạn không có quyền chỉnh sửa trang này!");
                 return;
@@ -886,7 +897,12 @@
             let viewingRole = getUserRole(viewingUser);
             if (viewingRole === 'vip' || viewingRole === 'owner') {
                 vipLinkSection.style.display = 'block';
-                let personalLink = window.location.origin + window.location.pathname + "#" + viewingUser;
+                
+                // Fix chuẩn xác tuyệt đối giữ lại thư mục con (ví dụ /webnhac/)
+                let cleanHref = window.location.href.split('#')[0];
+                if (!cleanHref.endsWith('/')) cleanHref += '/';
+                let personalLink = cleanHref + "#" + viewingUser;
+
                 document.getElementById('myVipLinkText').innerText = personalLink;
                 
                 let expireTime = getUserExpire(viewingUser);
@@ -1001,7 +1017,6 @@
             }
         }
 
-        // Hàm nén ảnh chống lag khi up ảnh nặng từ điện thoại
         function compressImage(file, callback) {
             let reader = new FileReader();
             reader.readAsDataURL(file);
@@ -1012,7 +1027,7 @@
                     let canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    let maxDim = 800; // Giới hạn kích thước tối đa để mượt app
+                    let maxDim = 800;
                     if (width > height && width > maxDim) {
                         height *= maxDim / width;
                         width = maxDim;
@@ -1024,7 +1039,7 @@
                     canvas.height = height;
                     let ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', 0.7)); // Nén 70% chất lượng giúp file nhẹ, không bị tràn localStorage
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
                 }
             }
         }
