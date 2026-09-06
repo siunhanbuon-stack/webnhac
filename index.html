@@ -358,6 +358,9 @@
                     <button class="btn-close" onclick="closeModal()">Đóng</button>
                     <button class="btn-save" onclick="handleLogin()">Đăng Nhập</button>
                 </div>
+                <div style="text-align: center; margin-top: 12px; font-size: 12px; color: #94a3b8;">
+                    Quên mật khẩu liên hệ admin
+                </div>
                 <div class="switch-text" onclick="openAuthModal('register')">Chưa có tài khoản? <span>Đăng ký ngay</span></div>
             </div>
 
@@ -392,13 +395,13 @@
                 </div>
 
                 <div id="ownerControlPanel" class="admin-panel-box" style="display:none;">
-                    <label style="color:#f59e0b; font-weight:bold; margin-bottom:5px; display:block;">👑 Owner: Cấp VIP & Thời Hạn Sống</label>
+                    <label style="color:#f59e0b; font-weight:bold; margin-bottom:5px; display:block;">👑 Owner: Quản Lý VIP & Reset Mật Khẩu</label>
                     <div class="form-group">
-                        <label>Tên tài khoản cần cấp VIP</label>
+                        <label>Tên tài khoản cần thao tác</label>
                         <input type="text" id="targetVipUser" placeholder="Nhập chính xác tên tài khoản...">
                     </div>
                     <div class="form-group">
-                        <label>Thời hạn web sống (Số ngày)</label>
+                        <label>Thời hạn web sống (Số ngày khi cấp VIP)</label>
                         <select id="vipDaysSelect">
                             <option value="7">7 Ngày</option>
                             <option value="30">30 Ngày (1 Tháng)</option>
@@ -407,7 +410,14 @@
                             <option value="99999">Vĩnh viễn</option>
                         </select>
                     </div>
-                    <button class="btn-save" style="width:100%; margin-top:5px; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Xác Nhận Cấp VIP</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-save" style="flex:1; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Cấp/Gia Hạn VIP</button>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label>Mật khẩu mới (Dùng khi muốn Reset MK cho tài khoản trên)</label>
+                        <input type="text" id="resetNewPass" placeholder="Nhập mật khẩu mới...">
+                    </div>
+                    <button class="btn-save" style="width:100%; background:#ef4444; color:#fff;" onclick="resetUserPassword()">🔄 Reset Mật Khẩu</button>
                 </div>
 
                 <div class="form-group" id="layoutConfigGroup" style="display:none;">
@@ -682,7 +692,6 @@
                 badgeEl.style.display = "none";
             }
 
-            // Xử lý thanh menu góc phải: Chỉ hiện khi ở trang chính hoặc chính chủ truy cập link riêng
             let topRightBar = document.getElementById('topRightBar');
             let isOwnerPage = (viewingUser.toLowerCase() === "mrwenben");
             let isMyOwnPage = (loggedInUser && viewingUser.toLowerCase() === loggedInUser.toLowerCase());
@@ -703,7 +712,6 @@
                 }
                 topRightBar.innerHTML = htmlBar;
             } else {
-                // Khách xem link riêng tuyệt đối KHÔNG HIỆN GÌ CẢ
                 topRightBar.style.display = 'none';
             }
 
@@ -974,6 +982,53 @@
             }
         }
 
+        function resetUserPassword() {
+            let targetName = document.getElementById('targetVipUser').value.trim();
+            let newPass = document.getElementById('resetNewPass').value.trim();
+
+            if(!targetName || !newPass) {
+                alert("❌ Vui lòng nhập tên tài khoản và mật khẩu mới cần đổi!");
+                return;
+            }
+            let targetAcc = usersDB.find(u => u.user.toLowerCase() === targetName.toLowerCase());
+            if(targetAcc) {
+                targetAcc.pass = newPass;
+                localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
+                alert(`✅ Đã reset mật khẩu thành công cho tài khoản ${targetAcc.user}! Mật khẩu mới là: ${newPass}`);
+                document.getElementById('resetNewPass').value = "";
+            } else {
+                alert("❌ Không tìm thấy tên tài khoản này trong hệ thống!");
+            }
+        }
+
+        // Hàm nén ảnh chống lag khi up ảnh nặng từ điện thoại
+        function compressImage(file, callback) {
+            let reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                let img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    let canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    let maxDim = 800; // Giới hạn kích thước tối đa để mượt app
+                    if (width > height && width > maxDim) {
+                        height *= maxDim / width;
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width *= maxDim / height;
+                        height = maxDim;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    let ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg', 0.7)); // Nén 70% chất lượng giúp file nhẹ, không bị tràn localStorage
+                }
+            }
+        }
+
         function saveChanges() {
             siteData.name = document.getElementById('inputName').value;
             siteData.bio = document.getElementById('inputBio').value;
@@ -1001,16 +1056,27 @@
             let saveAllData = () => {
                 if(siteData.bg === 'CUSTOM_FILE' && fileInput.files && fileInput.files[0]) {
                     let file = fileInput.files[0];
-                    let reader = new FileReader();
-                    reader.onload = function(e) {
-                        siteData.customFile = e.target.result;
-                        siteData.customFileType = file.type;
-                        localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
-                        updateUI();
-                        closeModal();
-                        alert("✅ Đã lưu thay đổi thành công!");
+                    if(file.type.startsWith('video')) {
+                        let reader = new FileReader();
+                        reader.onload = function(e) {
+                            siteData.customFile = e.target.result;
+                            siteData.customFileType = file.type;
+                            localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
+                            updateUI();
+                            closeModal();
+                            alert("✅ Đã lưu thay đổi thành công!");
+                        }
+                        reader.readAsDataURL(file);
+                    } else {
+                        compressImage(file, function(compressedDataUrl) {
+                            siteData.customFile = compressedDataUrl;
+                            siteData.customFileType = file.type;
+                            localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
+                            updateUI();
+                            closeModal();
+                            alert("✅ Đã lưu thay đổi thành công!");
+                        });
                     }
-                    reader.readAsDataURL(file);
                 } else {
                     localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
                     updateUI();
@@ -1020,13 +1086,10 @@
             };
 
             if(modalAvatarInput.files && modalAvatarInput.files[0]) {
-                let avatarFile = modalAvatarInput.files[0];
-                let avtReader = new FileReader();
-                avtReader.onload = function(e) {
-                    siteData.avatar = e.target.result;
+                compressImage(modalAvatarInput.files[0], function(compressedAvatar) {
+                    siteData.avatar = compressedAvatar;
                     saveAllData();
-                }
-                avtReader.readAsDataURL(avatarFile);
+                });
             } else {
                 saveAllData();
             }
@@ -1035,14 +1098,12 @@
         function previewAvatar(event) {
             let file = event.target.files[0];
             if(file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    siteData.avatar = e.target.result;
+                compressImage(file, function(compressedAvatar) {
+                    siteData.avatar = compressedAvatar;
                     let targetKey = viewingUser.toLowerCase();
                     localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
                     updateUI();
-                }
-                reader.readAsDataURL(file);
+                });
             }
         }
     </script>
