@@ -16,22 +16,24 @@
             align-items: center;
             overflow-x: hidden;
             position: relative;
+        }
+
+        #bgImage, #bgVideo {
+            position: fixed;
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh;
+            object-fit: cover;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-        }
-
-        #bgVideo {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover;
             z-index: -2;
             display: none;
         }
 
         .bg-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.4);
             z-index: -1;
             pointer-events: none;
@@ -45,7 +47,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(10px);
             padding: 8px 14px;
             border-radius: 30px;
@@ -53,9 +55,8 @@
             font-size: 13px;
         }
 
-        .top-right-bar a, .top-right-bar span, .top-right-bar button {
+        .top-right-bar span, .top-right-bar button {
             color: #fff;
-            text-decoration: none;
             background: transparent;
             border: none;
             cursor: pointer;
@@ -148,6 +149,9 @@
             flex-direction: column;
             gap: 12px;
             width: 100%;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 4px;
         }
         
         .btn {
@@ -220,6 +224,7 @@
 </head>
 <body>
 
+    <div id="bgImage"></div>
     <video id="bgVideo" autoplay muted loop playsinline>
         <source src="" type="video/mp4" id="videoSource">
     </video>
@@ -243,7 +248,7 @@
                 <span class="badge" id="userBadge" style="display:none;"></span>
                 <div class="name" id="displayName">customcute</div>
             </div>
-            <div class="bio" id="displayBio">Chào mừng bạn đến với trang cá nhân của tôi!</div>
+            <div class="bio" id="displayBio">bố nhân loại là tao</div>
             
             <div class="links" id="linksContainer"></div>
         </div>
@@ -315,13 +320,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Chọn số lượng link muốn hiển thị</label>
+                    <label>Chọn số lượng link muốn hiển thị (Tối đa 10)</label>
                     <select id="linkCountSelect" onchange="renderLinkInputs()">
                         <option value="1">1 Link</option>
                         <option value="2">2 Link</option>
                         <option value="3">3 Link</option>
                         <option value="4">4 Link</option>
                         <option value="5">5 Link</option>
+                        <option value="6">6 Link</option>
+                        <option value="7">7 Link</option>
+                        <option value="8">8 Link</option>
+                        <option value="9">9 Link</option>
+                        <option value="10">10 Link</option>
                     </select>
                 </div>
                 <div id="dynamicLinkInputs"></div>
@@ -329,18 +339,13 @@
                 <div class="form-group">
                     <label>Chọn Background</label>
                     <select id="inputBgSelect" onchange="onBgSelectChange()">
-                        <option value="VID_SHOOTING">🌠 Sao Băng Đêm (Yêu thích của Owner)</option>
-                        <option value="VID_GALAXY">🌌 Vũ Trụ Huyền Ao & Thiên Hà</option>
-                        <option value="VID_RAIN">🌧️ Mưa Đêm Buồn Lãng Mạn</option>
-                        <option value="VID_FIRE">🔥 Ngọn Lửa Trái Tim Ấm Áp</option>
-                        <option value="VID_NEON">🌆 Cyberpunk Neon Động</option>
-                        <option value="VID_ANIME">✨ Anime Chill Động</option>
-                        <option value="CUSTOM_FILE">📁 Tự chọn Ảnh/Video từ thiết bị (Đt/Máy tính)</option>
+                        <option value="VID_SHOOTING">🌠 Sao Băng Đêm (Mặc định)</option>
+                        <option value="CUSTOM_FILE">📁 Tự chọn Ảnh/Video từ thiết bị</option>
                     </select>
                 </div>
 
                 <div class="form-group" id="customFileGroup" style="display:none;">
-                    <label>Bấm vào đây để chọn file từ máy</label>
+                    <label>Chọn file Ảnh/Video từ máy</label>
                     <input type="file" id="inputCustomFile" accept="image/*,video/*" style="padding: 8px; background: #1e293b; cursor: pointer;">
                 </div>
 
@@ -361,7 +366,7 @@
             { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner" }
         ];
         
-        let savedUsers = localStorage.getItem('usersDB_v8');
+        let savedUsers = localStorage.getItem('usersDB_v10');
         if (savedUsers) {
             try {
                 let parsed = JSON.parse(savedUsers);
@@ -371,9 +376,9 @@
                 usersDB = parsed;
             } catch(e) {}
         }
-        localStorage.setItem('usersDB_v8', JSON.stringify(usersDB));
+        localStorage.setItem('usersDB_v10', JSON.stringify(usersDB));
 
-        let loggedInUser = localStorage.getItem('loggedInUser_v8') || "Mrwenben";
+        let loggedInUser = localStorage.getItem('loggedInUser_v10') || "Mrwenben";
 
         function getUserRole(username) {
             let acc = usersDB.find(u => u.user === username);
@@ -396,7 +401,7 @@
                 customFileType: "",
                 showBadge: "yes"
             };
-            let saved = localStorage.getItem('userData_v8_' + username);
+            let saved = localStorage.getItem('userData_v10_' + username);
             return saved ? JSON.parse(saved) : defaultData;
         }
 
@@ -460,36 +465,31 @@
             
             let bgVal = siteData.bg;
             let videoEl = document.getElementById('bgVideo');
+            let imageEl = document.getElementById('bgImage');
             
-            let videoUrls = {
-                "VID_SHOOTING": "https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1610-large.mp4",
-                "VID_GALAXY": "https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-and-lights-31940-large.mp4",
-                "VID_RAIN": "https://assets.mixkit.co/videos/preview/mixkit-raindrops-falling-on-glass-1200-large.mp4",
-                "VID_FIRE": "https://assets.mixkit.co/videos/preview/mixkit-flames-in-a-dark-background-5058-large.mp4",
-                "VID_NEON": "https://assets.mixkit.co/videos/preview/mixkit-futuristic-city-with-neon-lights-41712-large.mp4",
-                "VID_ANIME": "https://assets.mixkit.co/videos/preview/mixkit-purple-and-blue-fluorescent-lights-background-41483-large.mp4"
-            };
+            let defaultVideoUrl = "https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1610-large.mp4";
 
             if(bgVal === "CUSTOM_FILE") {
                 if(siteData.customFile) {
                     if(siteData.customFileType && siteData.customFileType.startsWith('video')) {
+                        imageEl.style.display = "none";
                         videoEl.style.display = "block";
                         videoEl.src = siteData.customFile;
                         videoEl.play().catch(e => {});
-                        document.body.style.backgroundImage = "none";
                     } else {
                         videoEl.style.display = "none";
-                        document.body.style.backgroundImage = `url('${siteData.customFile}')`;
+                        imageEl.style.display = "block";
+                        imageEl.style.backgroundImage = `url('${siteData.customFile}')`;
                     }
                 } else {
                     videoEl.style.display = "none";
-                    document.body.style.backgroundImage = "none";
+                    imageEl.style.display = "none";
                 }
-            } else if(videoUrls[bgVal]) {
+            } else {
+                imageEl.style.display = "none";
                 videoEl.style.display = "block";
-                document.body.style.backgroundImage = "none";
-                if(videoEl.src !== videoUrls[bgVal]) {
-                    videoEl.src = videoUrls[bgVal];
+                if(videoEl.src !== defaultVideoUrl) {
+                    videoEl.src = defaultVideoUrl;
                     videoEl.play().catch(e => {});
                 }
             }
@@ -529,7 +529,7 @@
 
             if(found) {
                 loggedInUser = u;
-                localStorage.setItem('loggedInUser_v8', u);
+                localStorage.setItem('loggedInUser_v10', u);
                 siteData = getUserData(u);
                 updateUI();
                 closeModal();
@@ -540,7 +540,7 @@
 
         function handleLogout() {
             loggedInUser = "";
-            localStorage.removeItem('loggedInUser_v8');
+            localStorage.removeItem('loggedInUser_v10');
             updateUI();
         }
 
@@ -559,10 +559,10 @@
             }
 
             usersDB.push({ user: u, pass: p, role: "basic" });
-            localStorage.setItem('usersDB_v8', JSON.stringify(usersDB));
+            localStorage.setItem('usersDB_v10', JSON.stringify(usersDB));
             
             loggedInUser = u;
-            localStorage.setItem('loggedInUser_v8', u);
+            localStorage.setItem('loggedInUser_v10', u);
             siteData = getUserData(u);
             updateUI();
             closeModal();
@@ -596,7 +596,7 @@
             onBgSelectChange();
 
             let count = siteData.links ? siteData.links.length : 3;
-            document.getElementById('linkCountSelect').value = count > 5 ? 5 : count;
+            document.getElementById('linkCountSelect').value = count > 10 ? 10 : count;
             renderLinkInputs();
         }
 
@@ -630,13 +630,17 @@
 
         function upgradeToVip() {
             let targetName = document.getElementById('targetVipUser').value.trim();
+            if(!targetName) {
+                alert("❌ Vui lòng nhập tên tài khoản cần cấp VIP!");
+                return;
+            }
             let targetAcc = usersDB.find(u => u.user === targetName);
             if(targetAcc) {
                 targetAcc.role = 'vip';
-                localStorage.setItem('usersDB_v8', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v10', JSON.stringify(usersDB));
                 alert(`✅ Đã nâng cấp tài khoản ${targetName} lên VIP thành công!`);
             } else {
-                alert("❌ Không tìm thấy tên tài khoản này!");
+                alert("❌ Không tìm thấy tên tài khoản này trong hệ thống!");
             }
         }
 
@@ -666,14 +670,14 @@
                 reader.onload = function(e) {
                     siteData.customFile = e.target.result;
                     siteData.customFileType = file.type;
-                    localStorage.setItem('userData_v8_' + loggedInUser, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v10_' + loggedInUser, JSON.stringify(siteData));
                     updateUI();
                     closeModal();
                     alert("✅ Đã lưu thay đổi thành công!");
                 }
                 reader.readAsDataURL(file);
             } else {
-                localStorage.setItem('userData_v8_' + loggedInUser, JSON.stringify(siteData));
+                localStorage.setItem('userData_v10_' + loggedInUser, JSON.stringify(siteData));
                 updateUI();
                 closeModal();
                 alert("✅ Đã lưu thay đổi thành công!");
@@ -686,7 +690,7 @@
                 let reader = new FileReader();
                 reader.onload = function(e) {
                     siteData.avatar = e.target.result;
-                    localStorage.setItem('userData_v8_' + loggedInUser, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v10_' + loggedInUser, JSON.stringify(siteData));
                     updateUI();
                 }
                 reader.readAsDataURL(file);
