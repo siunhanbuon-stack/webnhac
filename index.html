@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">Trang Cá Nhân Của Bạn</title>
+    <title id="page-title">customcute</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -16,30 +16,21 @@
             align-items: center;
             overflow-x: hidden;
             position: relative;
+            background-size: cover;
+            background-position: center;
+            transition: background 0.5s ease;
         }
 
-        /* Hiệu ứng sao băng rải khắp màn hình */
-        .shooting-stars {
+        /* Lớp phủ tối nhẹ để nổi bật chữ */
+        .bg-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            overflow: hidden;
+            background: rgba(0, 0, 0, 0.45);
             z-index: 1;
-        }
-        .star {
-            position: absolute;
-            width: 2px; height: 2px;
-            background: #fff;
-            box-shadow: 0 0 10px #fff, 0 0 20px #38bdf8;
-            animation: shoot linear infinite;
-            opacity: 0;
-        }
-        @keyframes shoot {
-            0% { transform: translateY(-150px) translateX(0); opacity: 1; }
-            100% { transform: translateY(110vh) translateX(-300px); opacity: 0; }
+            pointer-events: none;
         }
 
-        /* Container chìm trực tiếp vào background */
+        /* Main Container chìm vào background */
         .container {
             position: relative;
             z-index: 2;
@@ -60,7 +51,7 @@
             }
         }
 
-        /* Avatar không khung, chìm vào nền */
+        /* Avatar không viền */
         .left-section {
             display: flex;
             flex-direction: column;
@@ -78,7 +69,7 @@
             transition: 0.3s;
         }
         .avatar:hover { transform: scale(1.05); }
-        .avatar-hint { font-size: 11px; color: #94a3b8; margin-top: 8px; text-align: center; }
+        .avatar-hint { font-size: 11px; color: #cbd5e1; margin-top: 8px; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
         #avatar-input { display: none; }
 
         /* Thông tin bên phải */
@@ -91,10 +82,33 @@
         }
         @media(min-width: 600px) { .right-section { text-align: left; } }
 
-        .name { font-size: 26px; font-weight: bold; margin-bottom: 6px; color: #f8fafc; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-        .bio { font-size: 14px; color: #cbd5e1; margin-bottom: 20px; line-height: 1.4; text-shadow: 0 1px 5px rgba(0,0,0,0.8); }
+        .name-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        @media(min-width: 600px) { .name-wrapper { justify-content: flex-start; } }
 
-        /* Nút mạng xã hội trong suốt mượt mà */
+        .name { font-size: 26px; font-weight: bold; color: #f8fafc; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+        
+        /* Huy hiệu Owner / VIP / Basic */
+        .badge {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-owner { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
+        .badge-vip { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6); }
+        .badge-basic { background: rgba(255, 255, 255, 0.2); color: #e2e8f0; }
+
+        .bio { font-size: 14px; color: #e2e8f0; margin-bottom: 20px; line-height: 1.4; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+
+        /* Các nút mạng xã hội */
         .links {
             display: flex;
             flex-direction: column;
@@ -106,7 +120,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.65);
             backdrop-filter: blur(10px);
             color: #fff;
             padding: 12px 20px;
@@ -114,12 +128,12 @@
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             transition: 0.25s ease;
         }
-        .btn:hover { background: rgba(30, 41, 59, 0.8); transform: translateY(-2px); border-color: rgba(56, 189, 248, 0.5); }
+        .btn:hover { background: rgba(30, 41, 59, 0.85); transform: translateY(-2px); border-color: rgba(56, 189, 248, 0.6); }
 
-        /* Nút Chỉnh sửa / Đăng nhập ở dưới */
+        /* Nút Đăng nhập/Đăng ký góc phải phía trên / dưới */
         .nav-actions {
             display: flex;
             gap: 15px;
@@ -130,16 +144,17 @@
 
         .action-link {
             background: transparent;
-            color: #94a3b8;
+            color: #cbd5e1;
             border: none;
             font-size: 12px;
             cursor: pointer;
             text-decoration: underline;
             transition: 0.2s;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
         .action-link:hover { color: #fff; }
 
-        /* Modal Quản trị & Đăng nhập */
+        /* Modal Quản trị */
         .modal {
             display: none;
             position: fixed;
@@ -155,7 +170,7 @@
             padding: 25px;
             border-radius: 20px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             border: 1px solid rgba(255,255,255,0.15);
             max-height: 90vh;
             overflow-y: auto;
@@ -164,24 +179,32 @@
         .modal-content h3 { margin-bottom: 15px; font-size: 18px; color: #38bdf8; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 12px; margin-bottom: 5px; color: #94a3b8; }
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155;
             color: #fff; border-radius: 8px; font-size: 14px; outline: none;
         }
-        .form-group input:focus { border-color: #38bdf8; }
+        .form-group input:focus, .form-group select:focus { border-color: #38bdf8; }
         .modal-btns { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
         .modal-btns button { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; }
         .btn-save { background: #38bdf8; color: #0f172a; }
         .btn-close { background: #334155; color: #fff; }
         .switch-text { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 12px; cursor: pointer; }
         .switch-text span { color: #38bdf8; text-decoration: underline; }
+        
+        .admin-panel-box {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px dashed rgba(56, 189, 248, 0.4);
+        }
     </style>
 </head>
 <body>
 
-    <div class="shooting-stars" id="starContainer"></div>
+    <div class="bg-overlay"></div>
 
-    <audio id="bgMusic" loop>
+    <audio id="bgMusic" loop autoplay>
         <source id="audioSource" src="" type="audio/mp3">
     </audio>
 
@@ -193,18 +216,18 @@
         </div>
 
         <div class="right-section">
-            <div class="name" id="displayName">Tên Của Bạn</div>
-            <div class="bio" id="displayBio">Tiểu sử hoặc châm ngôn sống...</div>
-            
-            <div class="links">
-                <a href="#" id="linkFb" class="btn" target="_blank">🌐 Facebook</a>
-                <a href="#" id="linkTiktok" class="btn" target="_blank">🎵 Tiktok</a>
-                <a href="#" id="linkIg" class="btn" target="_blank">📸 Instagram</a>
+            <div class="name-wrapper">
+                <span class="badge" id="userBadge">BASIC</span>
+                <div class="name" id="displayName">customcute</div>
             </div>
+            <div class="bio" id="displayBio">Chào mừng bạn đến với trang cá nhân của tôi!</div>
+            
+            <div class="links" id="linksContainer">
+                </div>
 
             <div class="nav-actions">
                 <button class="action-link" onclick="openAuthModal('login')">🔑 Đăng nhập</button>
-                <button class="action-link" onclick="openAuthModal('register')">✨ Đăng ký tài khoản</button>
+                <button class="action-link" onclick="openAuthModal('register')">✨ Đăng ký</button>
             </div>
         </div>
     </div>
@@ -212,7 +235,7 @@
     <div class="modal" id="authModal">
         <div class="modal-content">
             <div id="loginForm">
-                <h3 id="modalTitle">🔑 Đăng Nhập Hệ Thống</h3>
+                <h3>🔑 Đăng Nhập Hệ Thống</h3>
                 <div class="form-group">
                     <label>Tài khoản</label>
                     <input type="text" id="loginUser" placeholder="Nhập tài khoản...">
@@ -246,7 +269,17 @@
             </div>
 
             <div id="editForm" style="display:none;">
-                <h3>🛠️ Cấu Hình Trang Web (<span id="currentAdminName"></span>)</h3>
+                <h3>🛠️ Cấu Hình (<span id="currentAdminName"></span>)</h3>
+                
+                <div id="ownerControlPanel" class="admin-panel-box" style="display:none;">
+                    <label style="color:#f59e0b; font-weight:bold; margin-bottom:5px; display:block;">👑 Bảng Quản Trị Owner</label>
+                    <div class="form-group">
+                        <label>Nâng cấp tài khoản bất kỳ thành VIP</label>
+                        <input type="text" id="targetVipUser" placeholder="Nhập tên tài khoản cần cấp VIP...">
+                    </div>
+                    <button class="btn-save" style="width:100%; margin-top:5px; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Cấp Quyền VIP</button>
+                </div>
+
                 <div class="form-group">
                     <label>Tên hiển thị</label>
                     <input type="text" id="inputName">
@@ -256,20 +289,30 @@
                     <input type="text" id="inputBio">
                 </div>
                 <div class="form-group">
-                    <label>Link Facebook</label>
-                    <input type="text" id="inputFb">
+                    <label>Chọn số lượng link muốn hiển thị</label>
+                    <select id="linkCountSelect" onchange="renderLinkInputs()">
+                        <option value="1">1 Link</option>
+                        <option value="2">2 Link</option>
+                        <option value="3">3 Link</option>
+                        <option value="4">4 Link</option>
+                        <option value="5">5 Link</option>
+                    </select>
+                </div>
+                <div id="dynamicLinkInputs">
+                    </div>
+                <div class="form-group">
+                    <label>Chọn Background Cute / Động</label>
+                    <select id="inputBgSelect">
+                        <option value="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1994&auto=format&fit=crop">🌌 Sao Băng Đêm (Basic)</option>
+                        <option value="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop">🌸 Đào Rơi Mộng Mơ (Basic)</option>
+                        <option value="VIP_KITTY" class="vip-bg-option" style="color:#ec4899;">🎀 Hello Kitty Động (VIP / Owner)</option>
+                        <option value="VIP_ANIME" class="vip-bg-option" style="color:#a855f7;">✨ Anime Chill Động (VIP / Owner)</option>
+                        <option value="VIP_NEON" class="vip-bg-option" style="color:#38bdf8;">🌆 Cyberpunk Neon (VIP / Owner)</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>Link Tiktok</label>
-                    <input type="text" id="inputTiktok">
-                </div>
-                <div class="form-group">
-                    <label>Link Instagram</label>
-                    <input type="text" id="inputIg">
-                </div>
-                <div class="form-group">
-                    <label>Tải lên nhạc MP3 mới</label>
-                    <input type="file" id="inputMusic" accept="audio/mp3">
+                    <label>Đường dẫn link nhạc MP3 trực tuyến (Phát ngay lập tức)</label>
+                    <input type="text" id="inputMusicUrl" placeholder="Dán link mp3 trực tiếp vào đây...">
                 </div>
                 <div class="modal-btns">
                     <button class="btn-close" onclick="closeModal()">Đóng</button>
@@ -280,24 +323,35 @@
     </div>
 
     <script>
-        // Danh sách tài khoản mặc định (có thể đăng ký thêm trực tiếp)
+        // Danh sách tài khoản lưu trữ chung
         let usersDB = JSON.parse(localStorage.getItem('usersDB')) || [
-            { user: "admin", pass: "123456" },
-            { user: "boss", pass: "admin666" }
+            { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner" }
         ];
 
-        let loggedInUser = localStorage.getItem('loggedInUser') || "admin";
+        let loggedInUser = localStorage.getItem('loggedInUser') || "Mrwenben";
 
-        // Lấy dữ liệu riêng biệt của từng tài khoản
+        // Đảm bảo tài khoản Mrwenben luôn là owner tối cao
+        let ownerAcc = usersDB.find(u => u.user === "Mrwenben");
+        if(ownerAcc) { ownerAcc.role = "owner"; } 
+        else { usersDB.unshift({ user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner" }); }
+
+        function getUserRole(username) {
+            let acc = usersDB.find(u => u.user === username);
+            return acc ? acc.role : "basic";
+        }
+
         function getUserData(username) {
             let defaultData = {
-                name: "Tên Của Bạn",
-                bio: "Tiểu sử hoặc châm ngôn sống...",
-                fb: "https://facebook.com",
-                tiktok: "https://tiktok.com",
-                ig: "https://instagram.com",
+                name: "customcute",
+                bio: "Chào mừng bạn đến với trang cá nhân của tôi!",
+                links: [
+                    { name: "Facebook", url: "https://facebook.com" },
+                    { name: "Tiktok", url: "https://tiktok.com" },
+                    { name: "Instagram", url: "https://instagram.com" }
+                ],
                 avatar: "https://via.placeholder.com/150",
-                music: ""
+                music: "",
+                bg: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1994&auto=format&fit=crop"
             };
             let saved = localStorage.getItem('userData_' + username);
             return saved ? JSON.parse(saved) : defaultData;
@@ -305,30 +359,60 @@
 
         let siteData = getUserData(loggedInUser);
 
-        // Hiệu ứng sao băng
-        const starContainer = document.getElementById('starContainer');
-        for (let i = 0; i < 35; i++) {
-            let star = document.createElement('div');
-            star.className = 'star';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-            star.style.animationDelay = (Math.random() * 5) + 's';
-            starContainer.appendChild(star);
-        }
-
         function updateUI() {
+            let role = getUserRole(loggedInUser);
+            
+            // Cập nhật huy hiệu
+            let badgeEl = document.getElementById('userBadge');
+            if(role === 'owner') {
+                badgeEl.innerText = "OWNER";
+                badgeEl.className = "badge badge-owner";
+            } else if(role === 'vip') {
+                badgeEl.innerText = "VIP";
+                badgeEl.className = "badge badge-vip";
+            } else {
+                badgeEl.innerText = "BASIC";
+                badgeEl.className = "badge badge-basic";
+            }
+
             document.getElementById('displayName').innerText = siteData.name;
             document.getElementById('displayBio').innerText = siteData.bio;
-            document.getElementById('linkFb').href = siteData.fb;
-            document.getElementById('linkTiktok').href = siteData.tiktok;
-            document.getElementById('linkIg').href = siteData.ig;
+            
+            // Render links
+            let linksContainer = document.getElementById('linksContainer');
+            linksContainer.innerHTML = "";
+            if(siteData.links && siteData.links.length > 0) {
+                siteData.links.forEach(item => {
+                    let a = document.createElement('a');
+                    a.href = item.url || "#";
+                    a.className = "btn";
+                    a.target = "_blank";
+                    a.innerText = item.name || "Liên kết";
+                    linksContainer.appendChild(a);
+                });
+            }
+
             if(siteData.avatar) document.getElementById('avatarDisplay').style.backgroundImage = `url('${siteData.avatar}')`;
             
+            // Background
+            let bgVal = siteData.bg;
+            if(bgVal === 'VIP_KITTY') {
+                document.body.style.backgroundImage = "url('https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=1920&auto=format&fit=crop')";
+            } else if(bgVal === 'VIP_ANIME') {
+                document.body.style.backgroundImage = "url('https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1920&auto=format&fit=crop')";
+            } else if(bgVal === 'VIP_NEON') {
+                document.body.style.backgroundImage = "url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1920&auto=format&fit=crop')";
+            } else {
+                document.body.style.backgroundImage = `url('${bgVal}')`;
+            }
+
+            // Nhạc nền phát ngay lập tức
             if(siteData.music) {
                 let musicEl = document.getElementById('bgMusic');
-                musicEl.src = siteData.music;
-                musicEl.play().catch(e => {});
+                if(musicEl.src !== siteData.music) {
+                    musicEl.src = siteData.music;
+                    musicEl.play().catch(e => {});
+                }
             }
         }
         updateUI();
@@ -340,7 +424,6 @@
             }
         }, { once: true });
 
-        // Xử lý Modal & Chuyển đổi form
         function openAuthModal(type) {
             document.getElementById('authModal').style.display = 'flex';
             document.getElementById('loginForm').style.display = (type === 'login') ? 'block' : 'none';
@@ -378,11 +461,11 @@
             }
 
             if(usersDB.some(acc => acc.user === u)) {
-                alert("❌ Tài khoản này đã tồn tại, vui lòng chọn tên khác!");
+                alert("❌ Tài khoản này đã tồn tại!");
                 return;
             }
 
-            usersDB.push({ user: u, pass: p });
+            usersDB.push({ user: u, pass: p, role: "basic" });
             localStorage.setItem('usersDB', JSON.stringify(usersDB));
             
             loggedInUser = u;
@@ -390,7 +473,7 @@
             siteData = getUserData(u);
             updateUI();
             
-            alert("✅ Đăng ký thành công! Đang chuyển vào bảng chỉnh sửa...");
+            alert("✅ Đăng ký thành công tài khoản BASIC!");
             openEditForm();
         }
 
@@ -400,39 +483,83 @@
             document.getElementById('editForm').style.display = 'block';
             document.getElementById('currentAdminName').innerText = loggedInUser;
 
+            let role = getUserRole(loggedInUser);
+            let ownerPanel = document.getElementById('ownerControlPanel');
+            ownerPanel.style.display = (role === 'owner') ? 'block' : 'none';
+
+            // Ẩn/Hiện background VIP cho user thường
+            let vipOptions = document.querySelectorAll('.vip-bg-option');
+            vipOptions.forEach(opt => {
+                opt.style.display = (role === 'basic') ? 'none' : 'block';
+            });
+
             document.getElementById('inputName').value = siteData.name;
             document.getElementById('inputBio').value = siteData.bio;
-            document.getElementById('inputFb').value = siteData.fb;
-            document.getElementById('inputTiktok').value = siteData.tiktok;
-            document.getElementById('inputIg').value = siteData.ig;
+            document.getElementById('inputMusicUrl').value = siteData.music || "";
+            document.getElementById('inputBgSelect').value = siteData.bg || "";
+
+            let count = siteData.links ? siteData.links.length : 3;
+            document.getElementById('linkCountSelect').value = count > 5 ? 5 : count;
+            renderLinkInputs();
+        }
+
+        function renderLinkInputs() {
+            let count = parseInt(document.getElementById('linkCountSelect').value);
+            let container = document.getElementById('dynamicLinkInputs');
+            container.innerHTML = "";
+
+            for(let i=0; i<count; i++) {
+                let existingName = (siteData.links && siteData.links[i]) ? siteData.links[i].name : `Link ${i+1}`;
+                let existingUrl = (siteData.links && siteData.links[i]) ? siteData.links[i].url : '';
+
+                container.innerHTML += `
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <input type="text" id="linkName_${i}" placeholder="Tên nút ${i+1}" value="${existingName}" style="flex:1;">
+                        <input type="text" id="linkUrl_${i}" placeholder="Đường dẫn URL" value="${existingUrl}" style="flex:2;">
+                    </div>
+                `;
+            }
+        }
+
+        function upgradeToVip() {
+            let targetName = document.getElementById('targetVipUser').value.trim();
+            let targetAcc = usersDB.find(u => u.user === targetName);
+            if(targetAcc) {
+                targetAcc.role = 'vip';
+                localStorage.setItem('usersDB', JSON.stringify(usersDB));
+                alert(`✅ Đã nâng cấp tài khoản ${targetName} lên VIP thành công!`);
+            } else {
+                alert("❌ Không tìm thấy tên tài khoản này!");
+            }
         }
 
         function saveChanges() {
+            let role = getUserRole(loggedInUser);
+            let chosenBg = document.getElementById('inputBgSelect').value;
+
+            // Chặn user basic chọn bg vip
+            if(role === 'basic' && (chosenBg.includes('VIP'))) {
+                alert("❌ Tài khoản BASIC không được sử dụng Background VIP này!");
+                return;
+            }
+
             siteData.name = document.getElementById('inputName').value;
             siteData.bio = document.getElementById('inputBio').value;
-            siteData.fb = document.getElementById('inputFb').value;
-            siteData.tiktok = document.getElementById('inputTiktok').value;
-            siteData.ig = document.getElementById('inputIg').value;
+            siteData.bg = chosenBg;
+            siteData.music = document.getElementById('inputMusicUrl').value.trim();
 
-            let musicFile = document.getElementById('inputMusic').files[0];
-            
-            function saveDataAndClose() {
-                localStorage.setItem('userData_' + loggedInUser, JSON.stringify(siteData));
-                updateUI();
-                closeModal();
-                alert("✅ Đã lưu thay đổi thành công cho tài khoản: " + loggedInUser);
+            let count = parseInt(document.getElementById('linkCountSelect').value);
+            siteData.links = [];
+            for(let i=0; i<count; i++) {
+                let n = document.getElementById(`linkName_${i}`).value;
+                let u = document.getElementById(`linkUrl_${i}`).value;
+                siteData.links.push({ name: n, url: u });
             }
 
-            if(musicFile) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    siteData.music = e.target.result;
-                    saveDataAndClose();
-                }
-                reader.readAsDataURL(musicFile);
-            } else {
-                saveDataAndClose();
-            }
+            localStorage.setItem('userData_' + loggedInUser, JSON.stringify(siteData));
+            updateUI();
+            closeModal();
+            alert("✅ Đã lưu thay đổi thành công!");
         }
 
         function previewAvatar(event) {
