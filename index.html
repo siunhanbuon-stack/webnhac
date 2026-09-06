@@ -267,11 +267,11 @@
             background: #1e293b;
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid #a855f7;
+            border: 1px solid #38bdf8;
             margin-top: 5px;
             word-break: break-all;
             font-size: 12px;
-            color: #f3e8ff;
+            color: #e2e8f0;
             font-family: monospace;
             display: flex;
             justify-content: space-between;
@@ -279,8 +279,8 @@
             gap: 8px;
         }
         .btn-copy {
-            background: #a855f7;
-            color: #fff;
+            background: #38bdf8;
+            color: #0f172a;
             border: none;
             padding: 5px 10px;
             border-radius: 6px;
@@ -289,22 +289,12 @@
             font-weight: bold;
             white-space: nowrap;
         }
-        .btn-copy:hover { background: #9333ea; }
+        .btn-copy:hover { background: #0ea5e9; }
         .vip-status-info {
             font-size: 11px;
-            color: #c084fc;
+            color: #38bdf8;
             margin-top: 4px;
         }
-        .expired-notice {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid #ef4444;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            margin-top: 15px;
-        }
-        .expired-notice h4 { color: #f87171; margin-bottom: 8px; font-size: 16px; }
-        .expired-notice p { font-size: 13px; color: #cbd5e1; line-height: 1.4; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -384,9 +374,9 @@
             <div id="editForm" style="display:none;">
                 <h3>🛠️ Cấu Hình Trang (<span id="currentAdminName"></span>)</h3>
                 
-                <div id="vipPersonalLinkSection" class="admin-panel-box" style="display:none; border-color: rgba(168, 85, 247, 0.6);">
-                    <label style="color:#a855f7; font-weight:bold; margin-bottom:3px; display:block;">💎 Đường Link Web Riêng Của Bạn</label>
-                    <span style="font-size:11px; color:#94a3b8;">Sao chép link này gửi cho bạn bè để truy cập trang VIP của bạn:</span>
+                <div id="vipPersonalLinkSection" class="admin-panel-box">
+                    <label style="color:#38bdf8; font-weight:bold; margin-bottom:3px; display:block;">🔗 Đường Link Trang Cá Nhân Của Bạn</label>
+                    <span style="font-size:11px; color:#94a3b8;">Sao chép link này dán sang Safari hay Google đều hiển thị chuẩn xác:</span>
                     <div class="vip-link-box">
                         <span id="myVipLinkText" style="overflow: hidden; text-overflow: ellipsis;"></span>
                         <button class="btn-copy" onclick="copyMyVipLink()">Sao chép</button>
@@ -394,7 +384,7 @@
                     <div class="vip-status-info" id="vipExpireInfoText"></div>
                 </div>
 
-                <div id="ownerControlPanel" class="admin-panel-box" style="display:none;">
+                <div id="ownerControlPanel" class="admin-panel-box" style="display:none; border-color: rgba(245, 158, 11, 0.6);">
                     <label style="color:#f59e0b; font-weight:bold; margin-bottom:5px; display:block;">👑 Owner: Quản Lý VIP & Reset Mật Khẩu</label>
                     <div class="form-group">
                         <label>Tên tài khoản cần thao tác</label>
@@ -410,18 +400,16 @@
                             <option value="99999">Vĩnh viễn</option>
                         </select>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn-save" style="flex:1; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Cấp/Gia Hạn VIP</button>
-                    </div>
+                    <button class="btn-save" style="width:100%; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Cấp/Gia Hạn VIP</button>
                     <div class="form-group" style="margin-top: 10px;">
-                        <label>Mật khẩu mới (Dùng khi muốn Reset MK cho tài khoản trên)</label>
+                        <label>Mật khẩu mới (Dùng khi muốn Reset MK)</label>
                         <input type="text" id="resetNewPass" placeholder="Nhập mật khẩu mới...">
                     </div>
                     <button class="btn-save" style="width:100%; background:#ef4444; color:#fff;" onclick="resetUserPassword()">🔄 Reset Mật Khẩu</button>
                 </div>
 
                 <div class="form-group" id="layoutConfigGroup" style="display:none;">
-                    <label>Kiểu hiển thị (Ảnh và Tên)</label>
+                    <label>Kiểu hiển thị (Ảnh và Tên - Dành cho VIP/Owner)</label>
                     <select id="inputLayout">
                         <option value="left">1. Ảnh bên trái, Tên bên phải</option>
                         <option value="center">2. Giữa (Ảnh trên, Tên dưới)</option>
@@ -468,19 +456,6 @@
                 </div>
                 <div id="dynamicLinkInputs"></div>
                 
-                <div class="form-group">
-                    <label>Chọn Background</label>
-                    <select id="inputBgSelect" onchange="onBgSelectChange()">
-                        <option value="VID_SHOOTING">🌠 Sao Băng Đêm (Mặc định)</option>
-                        <option value="CUSTOM_FILE">📁 Tự chọn Ảnh/Video từ thiết bị</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="customFileGroup" style="display:none;">
-                    <label>Chọn file Ảnh/Video từ máy</label>
-                    <input type="file" id="inputCustomFile" accept="image/*,video/*" style="padding: 8px; background: #1e293b; cursor: pointer;">
-                </div>
-
                 <div class="form-group">
                     <label>Đường dẫn link nhạc MP3 trực tuyến</label>
                     <input type="text" id="inputMusicUrl" placeholder="Dán link mp3 trực tiếp...">
@@ -565,19 +540,19 @@
             { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999999999 }
         ];
         
-        let savedUsers = localStorage.getItem('usersDB_v18');
+        let savedUsers = localStorage.getItem('usersDB_v20');
         if (savedUsers) {
             try {
                 let parsed = JSON.parse(savedUsers);
-                if(!parsed.some(u => u.user === "Mrwenben")) {
+                if(!parsed.some(u => u.user.toLowerCase() === "mrwenben")) {
                     parsed.unshift({ user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999999999 });
                 }
                 usersDB = parsed;
             } catch(e) {}
         }
-        localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
+        localStorage.setItem('usersDB_v20', JSON.stringify(usersDB));
 
-        let loggedInUser = localStorage.getItem('loggedInUser_v18') || "";
+        let loggedInUser = localStorage.getItem('loggedInUser_v20') || "";
 
         function checkVipExpiration() {
             let now = new Date().getTime();
@@ -590,7 +565,7 @@
                 }
             });
             if(updated) {
-                localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v20', JSON.stringify(usersDB));
             }
         }
         checkVipExpiration();
@@ -625,12 +600,10 @@
                 avatar: "https://via.placeholder.com/150",
                 music: "",
                 bg: "VID_SHOOTING",
-                customFile: "",
-                customFileType: "",
                 showBadge: "yes",
                 layout: "center"
             };
-            let saved = localStorage.getItem('userData_v18_' + username.toLowerCase());
+            let saved = localStorage.getItem('userData_v20_' + username.toLowerCase());
             return saved ? JSON.parse(saved) : defaultData;
         }
 
@@ -647,26 +620,6 @@
         function updateUI() {
             checkVipExpiration(); 
             let role = getUserRole(viewingUser);
-            let container = document.getElementById('mainContainer');
-
-            let accInfo = usersDB.find(u => u.user.toLowerCase() === viewingUser.toLowerCase());
-            let isVipExpired = accInfo && accInfo.role === 'vip' && accInfo.expire && accInfo.expire < new Date().getTime();
-
-            if (isVipExpired) {
-                container.innerHTML = `
-                    <div style="text-align: center; width: 100%;">
-                        <div class="expired-notice">
-                            <h4>⚠️ Trang Web VIP Đã Hết Hạn</h4>
-                            <p>Trang cá nhân riêng của tài khoản <b>${viewingUser}</b> đã hết hạn sử dụng và bị thu hồi.</p>
-                            <p>Vui lòng đăng nhập tài khoản của bạn bên dưới hoặc liên hệ Owner để gia hạn tiếp tục sử dụng!</p>
-                            <button class="btn-save" style="margin-top:10px; width:100%; padding:10px;" onclick="window.location.hash='#Mrwenben'; location.reload();">Về Trang Chủ Owner</button>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('topRightBar').style.display = 'none';
-                return;
-            }
-
             let profileHeader = document.getElementById('profileHeader');
             profileHeader.className = "profile-header";
             let currentLayout = siteData.layout || "center";
@@ -736,33 +689,8 @@
 
             if(siteData.avatar) document.getElementById('avatarDisplay').style.backgroundImage = `url('${siteData.avatar}')`;
             
-            let bgVal = siteData.bg;
-            let videoEl = document.getElementById('bgVideo');
-            let imageEl = document.getElementById('bgImage');
             let canvasEl = document.getElementById('starCanvas');
-
-            if(bgVal === "CUSTOM_FILE") {
-                canvasEl.style.display = "none";
-                if(siteData.customFile) {
-                    if(siteData.customFileType && siteData.customFileType.startsWith('video')) {
-                        imageEl.style.display = "none";
-                        videoEl.style.display = "block";
-                        videoEl.src = siteData.customFile;
-                        videoEl.play().catch(e => {});
-                    } else {
-                        videoEl.style.display = "none";
-                        imageEl.style.display = "block";
-                        imageEl.style.backgroundImage = `url('${siteData.customFile}')`;
-                    }
-                } else {
-                    videoEl.style.display = "none";
-                    imageEl.style.display = "none";
-                }
-            } else {
-                canvasEl.style.display = "block";
-                imageEl.style.display = "none";
-                videoEl.style.display = "none";
-            }
+            canvasEl.style.display = "block";
 
             if(siteData.music) {
                 let musicEl = document.getElementById('bgMusic');
@@ -812,7 +740,7 @@
             if(found) {
                 checkVipExpiration();
                 loggedInUser = found.user;
-                localStorage.setItem('loggedInUser_v18', found.user);
+                localStorage.setItem('loggedInUser_v20', found.user);
                 window.location.hash = "#" + found.user;
                 viewingUser = found.user;
                 siteData = getUserData(found.user);
@@ -826,7 +754,7 @@
 
         function handleLogout() {
             loggedInUser = "";
-            localStorage.removeItem('loggedInUser_v18');
+            localStorage.removeItem('loggedInUser_v20');
             window.location.hash = "#Mrwenben";
             viewingUser = "Mrwenben";
             siteData = getUserData("Mrwenben");
@@ -849,16 +777,16 @@
             }
 
             usersDB.push({ user: u, pass: p, role: "basic", expire: 0 });
-            localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
+            localStorage.setItem('usersDB_v20', JSON.stringify(usersDB));
             
             loggedInUser = u;
-            localStorage.setItem('loggedInUser_v18', u);
+            localStorage.setItem('loggedInUser_v20', u);
             window.location.hash = "#" + u;
             viewingUser = u;
             siteData = getUserData(u);
             updateUI();
             closeModal();
-            alert("✅ Đăng ký thành công!");
+            alert("✅ Đăng ký tài khoản Basic thành công!");
             location.reload();
         }
 
@@ -876,13 +804,6 @@
                 return;
             }
 
-            checkVipExpiration();
-            let currentRole = getUserRole(viewingUser);
-            if(viewingUser.toLowerCase() !== "mrwenben" && currentRole !== 'vip' && currentRole !== 'owner') {
-                alert("❌ Tài khoản VIP của bạn đã hết hạn, không thể cấu hình. Hãy liên hệ Owner để gia hạn!");
-                return;
-            }
-
             document.getElementById('authModal').style.display = 'flex';
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'none';
@@ -893,27 +814,26 @@
             let ownerPanel = document.getElementById('ownerControlPanel');
             ownerPanel.style.display = (logRole === 'owner') ? 'block' : 'none';
 
-            let vipLinkSection = document.getElementById('vipPersonalLinkSection');
-            let viewingRole = getUserRole(viewingUser);
-            if (viewingRole === 'vip' || viewingRole === 'owner') {
-                vipLinkSection.style.display = 'block';
-                
-                // Fix chuẩn xác tuyệt đối giữ lại thư mục con (ví dụ /webnhac/)
-                let cleanHref = window.location.href.split('#')[0];
-                if (!cleanHref.endsWith('/')) cleanHref += '/';
-                let personalLink = cleanHref + "#" + viewingUser;
-
-                document.getElementById('myVipLinkText').innerText = personalLink;
-                
-                let expireTime = getUserExpire(viewingUser);
-                if(viewingRole === 'owner') {
-                    document.getElementById('vipExpireInfoText').innerText = "⏳ Thời hạn: Vĩnh viễn (Owner)";
-                } else {
-                    let expireDateStr = new Date(expireTime).toLocaleString('vi-VN');
-                    document.getElementById('vipExpireInfoText').innerText = "⏳ Hạn sử dụng đến: " + expireDateStr;
+            // Khắc phục triệt để lỗi dán link qua Google/Chrome bị mất nội dung
+            let cleanHref = window.location.href.split('#')[0];
+            if (!cleanHref.endsWith('/')) {
+                // Kiểm tra xem nếu URL là file github.io trực tiếp mà không có / ở cuối thì thêm vào hoặc giữ nguyên
+                if (!cleanHref.includes('.html')) {
+                    cleanHref += '/';
                 }
+            }
+            let personalLink = cleanHref + "#" + viewingUser;
+            document.getElementById('myVipLinkText').innerText = personalLink;
+
+            let viewingRole = getUserRole(viewingUser);
+            let expireTime = getUserExpire(viewingUser);
+            if(viewingRole === 'owner') {
+                document.getElementById('vipExpireInfoText').innerText = "⏳ Quyền: Vĩnh viễn (Owner)";
+            } else if(viewingRole === 'vip') {
+                let expireDateStr = new Date(expireTime).toLocaleString('vi-VN');
+                document.getElementById('vipExpireInfoText').innerText = "⏳ Quyền VIP đến: " + expireDateStr;
             } else {
-                vipLinkSection.style.display = 'none';
+                document.getElementById('vipExpireInfoText').innerText = "💡 Quyền: Tài khoản Basic (Được tự do cấu hình tên, avatar, link, nhạc)";
             }
 
             let layoutConfigGroup = document.getElementById('layoutConfigGroup');
@@ -931,10 +851,7 @@
             document.getElementById('inputName').value = siteData.name;
             document.getElementById('inputBio').value = siteData.bio;
             document.getElementById('inputMusicUrl').value = siteData.music || "";
-            document.getElementById('inputBgSelect').value = siteData.bg || "VID_SHOOTING";
             document.getElementById('inputModalAvatar').value = ""; 
-            
-            onBgSelectChange();
 
             let count = siteData.links ? siteData.links.length : 3;
             document.getElementById('linkCountSelect').value = count > 10 ? 10 : count;
@@ -944,20 +861,10 @@
         function copyMyVipLink() {
             let linkText = document.getElementById('myVipLinkText').innerText;
             navigator.clipboard.writeText(linkText).then(() => {
-                alert("📋 Đã sao chép đường link web riêng của bạn!");
+                alert("📋 Đã sao chép đường link trang cá nhân chuẩn xác!");
             }).catch(err => {
                 alert("❌ Không thể sao chép tự động!");
             });
-        }
-
-        function onBgSelectChange() {
-            let val = document.getElementById('inputBgSelect').value;
-            let customFileGroup = document.getElementById('customFileGroup');
-            if(val === 'CUSTOM_FILE') {
-                customFileGroup.style.display = 'block';
-            } else {
-                customFileGroup.style.display = 'none';
-            }
         }
 
         function renderLinkInputs() {
@@ -991,7 +898,7 @@
                 targetAcc.role = 'vip';
                 let now = new Date().getTime();
                 targetAcc.expire = now + (days * 24 * 60 * 60 * 1000);
-                localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v20', JSON.stringify(usersDB));
                 alert(`✅ Đã cấp VIP thành công cho tài khoản ${targetAcc.user} trong ${days} ngày!`);
             } else {
                 alert("❌ Không tìm thấy tên tài khoản này trong hệ thống!");
@@ -1009,7 +916,7 @@
             let targetAcc = usersDB.find(u => u.user.toLowerCase() === targetName.toLowerCase());
             if(targetAcc) {
                 targetAcc.pass = newPass;
-                localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v20', JSON.stringify(usersDB));
                 alert(`✅ Đã reset mật khẩu thành công cho tài khoản ${targetAcc.user}! Mật khẩu mới là: ${newPass}`);
                 document.getElementById('resetNewPass').value = "";
             } else {
@@ -1047,7 +954,6 @@
         function saveChanges() {
             siteData.name = document.getElementById('inputName').value;
             siteData.bio = document.getElementById('inputBio').value;
-            siteData.bg = document.getElementById('inputBgSelect').value;
             siteData.music = document.getElementById('inputMusicUrl').value.trim();
 
             let targetRole = getUserRole(viewingUser);
@@ -1065,39 +971,13 @@
             }
 
             let modalAvatarInput = document.getElementById('inputModalAvatar');
-            let fileInput = document.getElementById('inputCustomFile');
             let targetKey = viewingUser.toLowerCase();
 
             let saveAllData = () => {
-                if(siteData.bg === 'CUSTOM_FILE' && fileInput.files && fileInput.files[0]) {
-                    let file = fileInput.files[0];
-                    if(file.type.startsWith('video')) {
-                        let reader = new FileReader();
-                        reader.onload = function(e) {
-                            siteData.customFile = e.target.result;
-                            siteData.customFileType = file.type;
-                            localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
-                            updateUI();
-                            closeModal();
-                            alert("✅ Đã lưu thay đổi thành công!");
-                        }
-                        reader.readAsDataURL(file);
-                    } else {
-                        compressImage(file, function(compressedDataUrl) {
-                            siteData.customFile = compressedDataUrl;
-                            siteData.customFileType = file.type;
-                            localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
-                            updateUI();
-                            closeModal();
-                            alert("✅ Đã lưu thay đổi thành công!");
-                        });
-                    }
-                } else {
-                    localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
-                    updateUI();
-                    closeModal();
-                    alert("✅ Đã lưu thay đổi thành công!");
-                }
+                localStorage.setItem('userData_v20_' + targetKey, JSON.stringify(siteData));
+                updateUI();
+                closeModal();
+                alert("✅ Đã lưu thay đổi thành công!");
             };
 
             if(modalAvatarInput.files && modalAvatarInput.files[0]) {
@@ -1116,7 +996,7 @@
                 compressImage(file, function(compressedAvatar) {
                     siteData.avatar = compressedAvatar;
                     let targetKey = viewingUser.toLowerCase();
-                    localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v20_' + targetKey, JSON.stringify(siteData));
                     updateUI();
                 });
             }
