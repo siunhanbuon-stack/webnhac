@@ -34,7 +34,7 @@
             position: fixed;
             top: 0; left: 0; 
             width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.25);
             z-index: -1;
             pointer-events: none;
         }
@@ -417,6 +417,26 @@
                     </select>
                 </div>
 
+                <!-- Cài đặt Background riêng cho VIP/Owner -->
+                <div class="form-group" id="bgConfigGroup" style="display:none;">
+                    <label>Chọn Loại Background Nền (VIP/Owner)</label>
+                    <select id="inputBgType" onchange="toggleBgInputs()">
+                        <option value="SHOOTING">🌌 Hiệu ứng sao băng vũ trụ</option>
+                        <option value="IMAGE">🖼️ Ảnh nền tải lên</option>
+                        <option value="VIDEO">🎥 Video nền (MP4)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="bgImageGroup" style="display:none;">
+                    <label>Tải lên Ảnh Nền (Background Image)</label>
+                    <input type="file" id="inputModalBgImage" accept="image/*" style="padding: 6px; background: #1e293b; cursor: pointer;">
+                </div>
+
+                <div class="form-group" id="bgVideoGroup" style="display:none;">
+                    <label>Tải lên Video Nền (MP4 tối đa vài MB)</label>
+                    <input type="file" id="inputModalBgVideo" accept="video/mp4" style="padding: 6px; background: #1e293b; cursor: pointer;">
+                </div>
+
                 <div class="form-group">
                     <label>Đổi Ảnh Đại Diện (Avatar)</label>
                     <input type="file" id="inputModalAvatar" accept="image/*" style="padding: 6px; background: #1e293b; cursor: pointer;">
@@ -599,7 +619,8 @@
                 ],
                 avatar: "https://via.placeholder.com/150",
                 music: "",
-                bg: "VID_SHOOTING",
+                bg: "SHOOTING",
+                bgCustom: "",
                 showBadge: "yes",
                 layout: "center"
             };
@@ -690,7 +711,29 @@
             if(siteData.avatar) document.getElementById('avatarDisplay').style.backgroundImage = `url('${siteData.avatar}')`;
             
             let canvasEl = document.getElementById('starCanvas');
-            canvasEl.style.display = "block";
+            let bgImgEl = document.getElementById('bgImage');
+            let bgVidEl = document.getElementById('bgVideo');
+            let vidSrcEl = document.getElementById('videoSource');
+
+            bgImgEl.style.display = "none";
+            bgVidEl.style.display = "none";
+            canvasEl.style.display = "none";
+
+            let bgMode = siteData.bg || "SHOOTING";
+            if(role === 'basic') bgMode = "SHOOTING"; // Basic mặc định sao băng
+
+            if(bgMode === "SHOOTING") {
+                canvasEl.style.display = "block";
+            } else if(bgMode === "IMAGE") {
+                bgImgEl.style.display = "block";
+                bgImgEl.style.backgroundImage = `url('${siteData.bgCustom || ""}')`;
+            } else if(bgMode === "VIDEO") {
+                bgVidEl.style.display = "block";
+                if(vidSrcEl.src !== siteData.bgCustom) {
+                    vidSrcEl.src = siteData.bgCustom;
+                    bgVidEl.load();
+                }
+            }
 
             if(siteData.music) {
                 let musicEl = document.getElementById('bgMusic');
@@ -814,10 +857,8 @@
             let ownerPanel = document.getElementById('ownerControlPanel');
             ownerPanel.style.display = (logRole === 'owner') ? 'block' : 'none';
 
-            // Khắc phục triệt để lỗi dán link qua Google/Chrome bị mất nội dung
             let cleanHref = window.location.href.split('#')[0];
             if (!cleanHref.endsWith('/')) {
-                // Kiểm tra xem nếu URL là file github.io trực tiếp mà không có / ở cuối thì thêm vào hoặc giữ nguyên
                 if (!cleanHref.includes('.html')) {
                     cleanHref += '/';
                 }
@@ -838,14 +879,23 @@
 
             let layoutConfigGroup = document.getElementById('layoutConfigGroup');
             let badgeConfigGroup = document.getElementById('badgeConfigGroup');
+            let bgConfigGroup = document.getElementById('bgConfigGroup');
+
             if (viewingRole === 'owner' || viewingRole === 'vip') {
                 layoutConfigGroup.style.display = 'block';
                 badgeConfigGroup.style.display = 'block';
+                bgConfigGroup.style.display = 'block';
+                
                 document.getElementById('inputLayout').value = siteData.layout || "center";
                 document.getElementById('inputShowBadge').value = siteData.showBadge || "yes";
+                document.getElementById('inputBgType').value = siteData.bg || "SHOOTING";
+                toggleBgInputs();
             } else {
                 layoutConfigGroup.style.display = 'none';
                 badgeConfigGroup.style.display = 'none';
+                bgConfigGroup.style.display = 'none';
+                document.getElementById('bgImageGroup').style.display = 'none';
+                document.getElementById('bgVideoGroup').style.display = 'none';
             }
 
             document.getElementById('inputName').value = siteData.name;
@@ -856,6 +906,12 @@
             let count = siteData.links ? siteData.links.length : 3;
             document.getElementById('linkCountSelect').value = count > 10 ? 10 : count;
             renderLinkInputs();
+        }
+
+        function toggleBgInputs() {
+            let bgType = document.getElementById('inputBgType').value;
+            document.getElementById('bgImageGroup').style.display = (bgType === 'IMAGE') ? 'block' : 'none';
+            document.getElementById('bgVideoGroup').style.display = (bgType === 'VIDEO') ? 'block' : 'none';
         }
 
         function copyMyVipLink() {
@@ -924,7 +980,7 @@
             }
         }
 
-        function compressImage(file, callback) {
+        function compressImage(file, callback, maxDim = 800, quality = 0.7) {
             let reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = function(event) {
@@ -934,7 +990,6 @@
                     let canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    let maxDim = 800;
                     if (width > height && width > maxDim) {
                         height *= maxDim / width;
                         width = maxDim;
@@ -946,7 +1001,7 @@
                     canvas.height = height;
                     let ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                    callback(canvas.toDataURL('image/jpeg', quality));
                 }
             }
         }
@@ -960,6 +1015,7 @@
             if (targetRole === 'owner' || targetRole === 'vip') {
                 siteData.layout = document.getElementById('inputLayout').value;
                 siteData.showBadge = document.getElementById('inputShowBadge').value;
+                siteData.bg = document.getElementById('inputBgType').value;
             }
 
             let count = parseInt(document.getElementById('linkCountSelect').value);
@@ -971,6 +1027,8 @@
             }
 
             let modalAvatarInput = document.getElementById('inputModalAvatar');
+            let modalBgImgInput = document.getElementById('inputModalBgImage');
+            let modalBgVidInput = document.getElementById('inputModalBgVideo');
             let targetKey = viewingUser.toLowerCase();
 
             let saveAllData = () => {
@@ -980,13 +1038,34 @@
                 alert("✅ Đã lưu thay đổi thành công!");
             };
 
+            let processFiles = () => {
+                if(targetRole === ('owner') || targetRole === ('vip')) {
+                    if(siteData.bg === 'IMAGE' && modalBgImgInput.files && modalBgImgInput.files[0]) {
+                        compressImage(modalBgImgInput.files[0], function(compBg) {
+                            siteData.bgCustom = compBg;
+                            saveAllData();
+                        }, 1200, 0.75);
+                        return;
+                    } else if(siteData.bg === 'VIDEO' && modalBgVidInput.files && modalBgVidInput.files[0]) {
+                        let reader = new FileReader();
+                        reader.readAsDataURL(modalBgVidInput.files[0]);
+                        reader.onload = function(e) {
+                            siteData.bgCustom = e.target.result;
+                            saveAllData();
+                        };
+                        return;
+                    }
+                }
+                saveAllData();
+            };
+
             if(modalAvatarInput.files && modalAvatarInput.files[0]) {
                 compressImage(modalAvatarInput.files[0], function(compressedAvatar) {
                     siteData.avatar = compressedAvatar;
-                    saveAllData();
-                });
+                    processFiles();
+                }, 400, 0.8);
             } else {
-                saveAllData();
+                processFiles();
             }
         }
 
@@ -998,7 +1077,7 @@
                     let targetKey = viewingUser.toLowerCase();
                     localStorage.setItem('userData_v20_' + targetKey, JSON.stringify(siteData));
                     updateUI();
-                });
+                }, 400, 0.8);
             }
         }
     </script>
