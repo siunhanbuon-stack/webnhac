@@ -81,7 +81,7 @@
             position: relative;
             z-index: 2;
             padding: 20px;
-            max-width: 500px;
+            max-width: 460px;
             width: 90%;
             display: flex;
             flex-direction: column;
@@ -90,45 +90,50 @@
             margin-top: 40px;
         }
 
-        /* Layout các kiểu hiển thị */
-        .container.layout-center {
+        .profile-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s ease;
+        }
+
+        .profile-header.layout-center {
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
-        .container.layout-center .right-section {
+        .profile-header.layout-center .right-section {
             align-items: center;
             text-align: center;
         }
-        .container.layout-center .name-wrapper {
+        .profile-header.layout-center .name-wrapper {
             justify-content: center;
         }
 
-        .container.layout-left {
+        .profile-header.layout-left {
             flex-direction: row;
             align-items: center;
             text-align: left;
-            max-width: 600px;
         }
-        .container.layout-left .right-section {
+        .profile-header.layout-left .right-section {
             align-items: flex-start;
             text-align: left;
         }
-        .container.layout-left .name-wrapper {
+        .profile-header.layout-left .name-wrapper {
             justify-content: flex-start;
         }
 
-        .container.layout-right {
+        .profile-header.layout-right {
             flex-direction: row-reverse;
             align-items: center;
             text-align: left;
-            max-width: 600px;
         }
-        .container.layout-right .right-section {
+        .profile-header.layout-right .right-section {
             align-items: flex-start;
             text-align: left;
         }
-        .container.layout-right .name-wrapper {
+        .profile-header.layout-right .name-wrapper {
             justify-content: flex-start;
         }
 
@@ -140,7 +145,7 @@
             flex-shrink: 0;
         }
         .avatar {
-            width: 110px; height: 110px;
+            width: 100px; height: 100px;
             border-radius: 50%;
             background: #1e293b;
             background-size: cover;
@@ -167,7 +172,7 @@
             flex-wrap: wrap;
         }
 
-        .name { font-size: 26px; font-weight: bold; color: #f8fafc; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+        .name { font-size: 24px; font-weight: bold; color: #f8fafc; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
         
         .badge {
             font-size: 10px;
@@ -180,14 +185,14 @@
         .badge-owner { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
         .badge-vip { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6); }
 
-        .bio { font-size: 14px; color: #e2e8f0; margin-bottom: 20px; line-height: 1.4; text-shadow: 0 1px 5px rgba(0,0,0,0.9); width: 100%; }
+        .bio { font-size: 13px; color: #e2e8f0; line-height: 1.4; text-shadow: 0 1px 5px rgba(0,0,0,0.9); width: 100%; }
 
         .links {
             display: flex;
             flex-direction: column;
             gap: 12px;
             width: 100%;
-            max-height: 60vh;
+            max-height: 55vh;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -315,23 +320,25 @@
         <source id="audioSource" src="" type="audio/mp3">
     </audio>
 
-    <div class="top-right-bar" id="topRightBar"></div>
+    <div class="top-right-bar" id="topRightBar" style="display:none;"></div>
 
-    <div class="container layout-center" id="mainContainer">
-        <div class="left-section" onclick="if(canEditCurrentPage()) document.getElementById('avatar-input').click()">
-            <div class="avatar" id="avatarDisplay" style="background-image: url('https://via.placeholder.com/150')"></div>
-            <input type="file" id="avatar-input" accept="image/*" onchange="previewAvatar(event)">
-        </div>
-
-        <div class="right-section">
-            <div class="name-wrapper">
-                <span class="badge" id="userBadge" style="display:none;"></span>
-                <div class="name" id="displayName">customcute</div>
+    <div class="container" id="mainContainer">
+        <div class="profile-header layout-center" id="profileHeader">
+            <div class="left-section" onclick="if(canEditCurrentPage()) document.getElementById('avatar-input').click()">
+                <div class="avatar" id="avatarDisplay" style="background-image: url('https://via.placeholder.com/150')"></div>
+                <input type="file" id="avatar-input" accept="image/*" onchange="previewAvatar(event)">
             </div>
-            <div class="bio" id="displayBio">bố nhân loại là tao</div>
-            
-            <div class="links" id="linksContainer"></div>
+
+            <div class="right-section">
+                <div class="name-wrapper">
+                    <span class="badge" id="userBadge" style="display:none;"></span>
+                    <div class="name" id="displayName">customcute</div>
+                </div>
+                <div class="bio" id="displayBio">bố nhân loại là tao</div>
+            </div>
         </div>
+
+        <div class="links" id="linksContainer"></div>
     </div>
 
     <!-- Modal Đăng nhập / Cấu hình -->
@@ -403,7 +410,6 @@
                     <button class="btn-save" style="width:100%; margin-top:5px; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Xác Nhận Cấp VIP</button>
                 </div>
 
-                <!-- TÙY CHỌN 3 KIỂU HIỂN THỊ (Dành cho VIP và Owner) -->
                 <div class="form-group" id="layoutConfigGroup" style="display:none;">
                     <label>Kiểu hiển thị (Ảnh và Tên)</label>
                     <select id="inputLayout">
@@ -549,7 +555,7 @@
             { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999999999 }
         ];
         
-        let savedUsers = localStorage.getItem('usersDB_v16');
+        let savedUsers = localStorage.getItem('usersDB_v18');
         if (savedUsers) {
             try {
                 let parsed = JSON.parse(savedUsers);
@@ -559,9 +565,9 @@
                 usersDB = parsed;
             } catch(e) {}
         }
-        localStorage.setItem('usersDB_v16', JSON.stringify(usersDB));
+        localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
 
-        let loggedInUser = localStorage.getItem('loggedInUser_v16') || "Mrwenben";
+        let loggedInUser = localStorage.getItem('loggedInUser_v18') || "";
 
         function checkVipExpiration() {
             let now = new Date().getTime();
@@ -574,7 +580,7 @@
                 }
             });
             if(updated) {
-                localStorage.setItem('usersDB_v16', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
             }
         }
         checkVipExpiration();
@@ -614,7 +620,7 @@
                 showBadge: "yes",
                 layout: "center"
             };
-            let saved = localStorage.getItem('userData_v16_' + username.toLowerCase());
+            let saved = localStorage.getItem('userData_v18_' + username.toLowerCase());
             return saved ? JSON.parse(saved) : defaultData;
         }
 
@@ -644,16 +650,17 @@
                         </div>
                     </div>
                 `;
+                document.getElementById('topRightBar').style.display = 'none';
                 return;
             }
 
-            // Thiết lập class Layout cho Container
-            container.className = "container";
+            let profileHeader = document.getElementById('profileHeader');
+            profileHeader.className = "profile-header";
             let currentLayout = siteData.layout || "center";
             if (role === 'owner' || role === 'vip') {
-                container.classList.add("layout-" + currentLayout);
+                profileHeader.classList.add("layout-" + currentLayout);
             } else {
-                container.classList.add("layout-center"); // Tài khoản basic luôn để giữa
+                profileHeader.classList.add("layout-center");
             }
 
             let badgeEl = document.getElementById('userBadge');
@@ -675,19 +682,30 @@
                 badgeEl.style.display = "none";
             }
 
+            // Xử lý thanh menu góc phải: Chỉ hiện khi ở trang chính hoặc chính chủ truy cập link riêng
             let topRightBar = document.getElementById('topRightBar');
-            let htmlBar = "";
-            if(loggedInUser) {
-                if(viewingUser.toLowerCase() !== loggedInUser.toLowerCase()) {
-                    htmlBar += `<button onclick="goToMyPage()">Trang của tôi</button><span>/</span>`;
+            let isOwnerPage = (viewingUser.toLowerCase() === "mrwenben");
+            let isMyOwnPage = (loggedInUser && viewingUser.toLowerCase() === loggedInUser.toLowerCase());
+            let isOwnerLoggedIn = (loggedInUser && getUserRole(loggedInUser) === 'owner');
+
+            if (isOwnerPage || isMyOwnPage || isOwnerLoggedIn) {
+                topRightBar.style.display = 'flex';
+                let htmlBar = "";
+                if(loggedInUser) {
+                    if(!isMyOwnPage && !isOwnerPage) {
+                        htmlBar += `<button onclick="goToMyPage()">Trang của tôi</button><span>/</span>`;
+                    }
+                    htmlBar += `<button onclick="openEditForm()">Cấu hình</button><span>/</span>`;
+                    htmlBar += `<button onclick="handleLogout()">Đăng xuất</button>`;
+                } else {
+                    htmlBar += `<button onclick="openAuthModal('login')">Đăng nhập</button><span>/</span>`;
+                    htmlBar += `<button onclick="openAuthModal('register')">Đăng ký</button>`;
                 }
-                htmlBar += `<button onclick="openEditForm()">Cấu hình</button><span>/</span>`;
-                htmlBar += `<button onclick="handleLogout()">Đăng xuất</button>`;
+                topRightBar.innerHTML = htmlBar;
             } else {
-                htmlBar += `<button onclick="openAuthModal('login')">Đăng nhập</button><span>/</span>`;
-                htmlBar += `<button onclick="openAuthModal('register')">Đăng ký</button>`;
+                // Khách xem link riêng tuyệt đối KHÔNG HIỆN GÌ CẢ
+                topRightBar.style.display = 'none';
             }
-            topRightBar.innerHTML = htmlBar;
 
             document.getElementById('displayName').innerText = siteData.name;
             document.getElementById('displayBio').innerText = siteData.bio;
@@ -783,7 +801,7 @@
             if(found) {
                 checkVipExpiration();
                 loggedInUser = found.user;
-                localStorage.setItem('loggedInUser_v16', found.user);
+                localStorage.setItem('loggedInUser_v18', found.user);
                 window.location.hash = "#" + found.user;
                 viewingUser = found.user;
                 siteData = getUserData(found.user);
@@ -797,7 +815,7 @@
 
         function handleLogout() {
             loggedInUser = "";
-            localStorage.removeItem('loggedInUser_v16');
+            localStorage.removeItem('loggedInUser_v18');
             window.location.hash = "#Mrwenben";
             viewingUser = "Mrwenben";
             siteData = getUserData("Mrwenben");
@@ -820,10 +838,10 @@
             }
 
             usersDB.push({ user: u, pass: p, role: "basic", expire: 0 });
-            localStorage.setItem('usersDB_v16', JSON.stringify(usersDB));
+            localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
             
             loggedInUser = u;
-            localStorage.setItem('loggedInUser_v16', u);
+            localStorage.setItem('loggedInUser_v18', u);
             window.location.hash = "#" + u;
             viewingUser = u;
             siteData = getUserData(u);
@@ -949,7 +967,7 @@
                 targetAcc.role = 'vip';
                 let now = new Date().getTime();
                 targetAcc.expire = now + (days * 24 * 60 * 60 * 1000);
-                localStorage.setItem('usersDB_v16', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v18', JSON.stringify(usersDB));
                 alert(`✅ Đã cấp VIP thành công cho tài khoản ${targetAcc.user} trong ${days} ngày!`);
             } else {
                 alert("❌ Không tìm thấy tên tài khoản này trong hệ thống!");
@@ -987,14 +1005,14 @@
                     reader.onload = function(e) {
                         siteData.customFile = e.target.result;
                         siteData.customFileType = file.type;
-                        localStorage.setItem('userData_v16_' + targetKey, JSON.stringify(siteData));
+                        localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
                         updateUI();
                         closeModal();
                         alert("✅ Đã lưu thay đổi thành công!");
                     }
                     reader.readAsDataURL(file);
                 } else {
-                    localStorage.setItem('userData_v16_' + targetKey, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
                     updateUI();
                     closeModal();
                     alert("✅ Đã lưu thay đổi thành công!");
@@ -1021,7 +1039,7 @@
                 reader.onload = function(e) {
                     siteData.avatar = e.target.result;
                     let targetKey = viewingUser.toLowerCase();
-                    localStorage.setItem('userData_v16_' + targetKey, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v18_' + targetKey, JSON.stringify(siteData));
                     updateUI();
                 }
                 reader.readAsDataURL(file);
