@@ -47,7 +47,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(10px);
             padding: 8px 14px;
             border-radius: 30px;
@@ -220,6 +220,48 @@
             margin-bottom: 15px;
             border: 1px dashed rgba(56, 189, 248, 0.4);
         }
+        .vip-link-box {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #a855f7;
+            margin-top: 5px;
+            word-break: break-all;
+            font-size: 12px;
+            color: #f3e8ff;
+            font-family: monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-copy {
+            background: #a855f7;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .btn-copy:hover { background: #9333ea; }
+        .vip-status-info {
+            font-size: 11px;
+            color: #c084fc;
+            margin-top: 4px;
+        }
+        .expired-notice {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .expired-notice h4 { color: #f87171; margin-bottom: 8px; font-size: 16px; }
+        .expired-notice p { font-size: 13px; color: #cbd5e1; line-height: 1.4; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -236,7 +278,7 @@
 
     <div class="top-right-bar" id="topRightBar"></div>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <div class="left-section" onclick="if(canEditCurrentPage()) document.getElementById('avatar-input').click()">
             <div class="avatar" id="avatarDisplay" style="background-image: url('https://via.placeholder.com/150')"></div>
             <span class="avatar-hint" id="avatarHintText">Bấm đổi ảnh</span>
@@ -254,6 +296,7 @@
         </div>
     </div>
 
+    <!-- Modal Modal Đăng nhập / Cấu hình -->
     <div class="modal" id="authModal">
         <div class="modal-content">
             <div id="loginForm">
@@ -293,14 +336,24 @@
             <div id="editForm" style="display:none;">
                 <h3>🛠️ Cấu Hình Trang (<span id="currentAdminName"></span>)</h3>
                 
+                <div id="vipPersonalLinkSection" class="admin-panel-box" style="display:none; border-color: rgba(168, 85, 247, 0.6);">
+                    <label style="color:#a855f7; font-weight:bold; margin-bottom:3px; display:block;">💎 Đường Link Web Riêng Của Bạn</label>
+                    <span style="font-size:11px; color:#94a3b8;">Sao chép link này gửi cho bạn bè để truy cập trang VIP của bạn:</span>
+                    <div class="vip-link-box">
+                        <span id="myVipLinkText" style="overflow: hidden; text-overflow: ellipsis;"></span>
+                        <button class="btn-copy" onclick="copyMyVipLink()">Sao chép</button>
+                    </div>
+                    <div class="vip-status-info" id="vipExpireInfoText"></div>
+                </div>
+
                 <div id="ownerControlPanel" class="admin-panel-box" style="display:none;">
-                    <label style="color:#f59e0b; font-weight:bold; margin-bottom:5px; display:block;">👑 Cấp VIP & Thời Hạn Web</label>
+                    <label style="color:#f59e0b; font-weight:bold; margin-bottom:5px; display:block;">👑 Owner: Cấp VIP & Thời Hạn Sống</label>
                     <div class="form-group">
                         <label>Tên tài khoản cần cấp VIP</label>
                         <input type="text" id="targetVipUser" placeholder="Nhập chính xác tên tài khoản...">
                     </div>
                     <div class="form-group">
-                        <label>Thời hạn VIP (Số ngày sống)</label>
+                        <label>Thời hạn web sống (Số ngày)</label>
                         <select id="vipDaysSelect">
                             <option value="7">7 Ngày</option>
                             <option value="30">30 Ngày (1 Tháng)</option>
@@ -309,7 +362,7 @@
                             <option value="99999">Vĩnh viễn</option>
                         </select>
                     </div>
-                    <button class="btn-save" style="width:100%; margin-top:5px; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Cấp Quyền VIP & Hạn Web</button>
+                    <button class="btn-save" style="width:100%; margin-top:5px; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Xác Nhận Cấp VIP</button>
                 </div>
 
                 <div class="form-group">
@@ -373,31 +426,37 @@
 
     <script>
         let usersDB = [
-            { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999 }
+            { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999999999 }
         ];
         
-        let savedUsers = localStorage.getItem('usersDB_v11');
+        let savedUsers = localStorage.getItem('usersDB_v15');
         if (savedUsers) {
             try {
                 let parsed = JSON.parse(savedUsers);
                 if(!parsed.some(u => u.user === "Mrwenben")) {
-                    parsed.unshift({ user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999 });
+                    parsed.unshift({ user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999999999 });
                 }
                 usersDB = parsed;
             } catch(e) {}
         }
-        localStorage.setItem('usersDB_v11', JSON.stringify(usersDB));
+        localStorage.setItem('usersDB_v15', JSON.stringify(usersDB));
 
-        let loggedInUser = localStorage.getItem('loggedInUser_v11') || "Mrwenben";
+        let loggedInUser = localStorage.getItem('loggedInUser_v15') || "Mrwenben";
 
+        // TỰ ĐỘNG HẠ CẤP NẾU HẾT HẠN
         function checkVipExpiration() {
             let now = new Date().getTime();
+            let updated = false;
             usersDB.forEach(u => {
                 if(u.role === 'vip' && u.expire && u.expire < now) {
                     u.role = 'basic';
+                    u.expire = 0;
+                    updated = true;
                 }
             });
-            localStorage.setItem('usersDB_v11', JSON.stringify(usersDB));
+            if(updated) {
+                localStorage.setItem('usersDB_v15', JSON.stringify(usersDB));
+            }
         }
         checkVipExpiration();
 
@@ -412,6 +471,11 @@
         function getUserRole(username) {
             let acc = usersDB.find(u => u.user.toLowerCase() === username.toLowerCase());
             return acc ? acc.role : "basic";
+        }
+
+        function getUserExpire(username) {
+            let acc = usersDB.find(u => u.user.toLowerCase() === username.toLowerCase());
+            return acc ? acc.expire : 0;
         }
 
         function getUserData(username) {
@@ -430,7 +494,7 @@
                 customFileType: "",
                 showBadge: "yes"
             };
-            let saved = localStorage.getItem('userData_v11_' + username.toLowerCase());
+            let saved = localStorage.getItem('userData_v15_' + username.toLowerCase());
             return saved ? JSON.parse(saved) : defaultData;
         }
 
@@ -445,9 +509,26 @@
         }
 
         function updateUI() {
+            checkVipExpiration(); 
             let role = getUserRole(viewingUser);
+            let container = document.getElementById('mainContainer');
+
+            // NẾU CỐ TÌNH VÀO LINK VIP NHƯNG TÀI KHOẢN ĐÓ ĐÃ HẾT HẠN (VỀ BASIC) HOẶC BỊ XÓA VÀ KHÔNG PHẢI OWNER
+            if (viewingUser.toLowerCase() !== "mrwenben" && role !== 'vip' && role !== 'owner') {
+                container.innerHTML = `
+                    <div style="text-align: center; width: 100%;">
+                        <div class="expired-notice">
+                            <h4>⚠️ Trang Web VIP Đã Hết Hạn</h4>
+                            <p>Trang cá nhân riêng của tài khoản <b>${viewingUser}</b> đã hết hạn sử dụng và bị thu hồi.</p>
+                            <p>Vui lòng đăng nhập tài khoản của bạn bên dưới hoặc liên hệ Owner để gia hạn tiếp tục sử dụng!</p>
+                            <button class="btn-save" style="margin-top:10px; width:100%; padding:10px;" onclick="window.location.hash='#Mrwenben'; location.reload();">Về Trang Chủ Owner</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
             let badgeEl = document.getElementById('userBadge');
-            
             if (role === 'owner' || role === 'vip') {
                 if (role === 'owner') {
                     badgeEl.innerText = "OWNER";
@@ -475,8 +556,6 @@
             }
 
             let topRightBar = document.getElementById('topRightBar');
-            let loginRole = loggedInUser ? getUserRole(loggedInUser) : "";
-            
             let htmlBar = "";
             if(loggedInUser) {
                 htmlBar += `<span>Xin chào: <b>${loggedInUser}</b></span>`;
@@ -553,7 +632,7 @@
         window.addEventListener('hashchange', function() {
             viewingUser = getTargetPageUser();
             siteData = getUserData(viewingUser);
-            updateUI();
+            location.reload(); // Reload nhẹ khi đổi hash để reset bố cục view chính xác
         });
 
         function goToMyPage() {
@@ -586,13 +665,15 @@
             let found = usersDB.find(acc => acc.user.toLowerCase() === u.toLowerCase() && acc.pass === p);
 
             if(found) {
+                checkVipExpiration();
                 loggedInUser = found.user;
-                localStorage.setItem('loggedInUser_v11', found.user);
+                localStorage.setItem('loggedInUser_v15', found.user);
                 window.location.hash = "#" + found.user;
                 viewingUser = found.user;
                 siteData = getUserData(found.user);
                 updateUI();
                 closeModal();
+                location.reload();
             } else {
                 alert("❌ Sai tài khoản hoặc mật khẩu!");
             }
@@ -600,11 +681,12 @@
 
         function handleLogout() {
             loggedInUser = "";
-            localStorage.removeItem('loggedInUser_v11');
+            localStorage.removeItem('loggedInUser_v15');
             window.location.hash = "#Mrwenben";
             viewingUser = "Mrwenben";
             siteData = getUserData("Mrwenben");
             updateUI();
+            location.reload();
         }
 
         function handleRegister() {
@@ -622,21 +704,29 @@
             }
 
             usersDB.push({ user: u, pass: p, role: "basic", expire: 0 });
-            localStorage.setItem('usersDB_v11', JSON.stringify(usersDB));
+            localStorage.setItem('usersDB_v15', JSON.stringify(usersDB));
             
             loggedInUser = u;
-            localStorage.setItem('loggedInUser_v11', u);
+            localStorage.setItem('loggedInUser_v15', u);
             window.location.hash = "#" + u;
             viewingUser = u;
             siteData = getUserData(u);
             updateUI();
             closeModal();
             alert("✅ Đăng ký thành công!");
+            location.reload();
         }
 
         function openEditForm() {
             if(!canEditCurrentPage()) {
-                alert("❌ Bạn không có quyền chỉnh sửa trang của người khác!");
+                alert("❌ Bạn không có quyền chỉnh sửa trang này!");
+                return;
+            }
+
+            checkVipExpiration();
+            let currentRole = getUserRole(viewingUser);
+            if(viewingUser.toLowerCase() !== "mrwenben" && currentRole !== 'vip' && currentRole !== 'owner') {
+                alert("❌ Tài khoản VIP của bạn đã hết hạn, không thể cấu hình. Hãy liên hệ Owner để gia hạn!");
                 return;
             }
 
@@ -650,9 +740,26 @@
             let ownerPanel = document.getElementById('ownerControlPanel');
             ownerPanel.style.display = (logRole === 'owner') ? 'block' : 'none';
 
+            let vipLinkSection = document.getElementById('vipPersonalLinkSection');
+            let viewingRole = getUserRole(viewingUser);
+            if (viewingRole === 'vip' || viewingRole === 'owner') {
+                vipLinkSection.style.display = 'block';
+                let personalLink = window.location.origin + window.location.pathname + "#" + viewingUser;
+                document.getElementById('myVipLinkText').innerText = personalLink;
+                
+                let expireTime = getUserExpire(viewingUser);
+                if(viewingRole === 'owner') {
+                    document.getElementById('vipExpireInfoText').innerText = "⏳ Thời hạn: Vĩnh viễn (Owner)";
+                } else {
+                    let expireDateStr = new Date(expireTime).toLocaleString('vi-VN');
+                    document.getElementById('vipExpireInfoText').innerText = "⏳ Hạn sử dụng đến: " + expireDateStr;
+                }
+            } else {
+                vipLinkSection.style.display = 'none';
+            }
+
             let badgeConfigGroup = document.getElementById('badgeConfigGroup');
-            let targetRole = getUserRole(viewingUser);
-            if (targetRole === 'owner' || targetRole === 'vip') {
+            if (viewingRole === 'owner' || viewingRole === 'vip') {
                 badgeConfigGroup.style.display = 'block';
                 document.getElementById('inputShowBadge').value = siteData.showBadge || "yes";
             } else {
@@ -669,6 +776,15 @@
             let count = siteData.links ? siteData.links.length : 3;
             document.getElementById('linkCountSelect').value = count > 10 ? 10 : count;
             renderLinkInputs();
+        }
+
+        function copyMyVipLink() {
+            let linkText = document.getElementById('myVipLinkText').innerText;
+            navigator.clipboard.writeText(linkText).then(() => {
+                alert("📋 Đã sao chép đường link web riêng của bạn!");
+            }).catch(err => {
+                alert("❌ Không thể sao chép tự động, hãy bôi đen và copy thủ công nhé!");
+            });
         }
 
         function onBgSelectChange() {
@@ -712,8 +828,8 @@
                 targetAcc.role = 'vip';
                 let now = new Date().getTime();
                 targetAcc.expire = now + (days * 24 * 60 * 60 * 1000);
-                localStorage.setItem('usersDB_v11', JSON.stringify(usersDB));
-                alert(`✅ Đã cấp VIP cho tài khoản ${targetAcc.user} thời hạn ${days === 99999 ? 'Vĩnh viễn' : days + ' ngày'}!`);
+                localStorage.setItem('usersDB_v15', JSON.stringify(usersDB));
+                alert(`✅ Đã cấp VIP thành công cho tài khoản ${targetAcc.user} trong ${days} ngày!`);
             } else {
                 alert("❌ Không tìm thấy tên tài khoản này trong hệ thống!");
             }
@@ -746,16 +862,14 @@
                 reader.onload = function(e) {
                     siteData.customFile = e.target.result;
                     siteData.customFileType = file.type;
-                    localStorage.setItem('userData_v10_' + targetKey, JSON.stringify(siteData));
-                    localStorage.setItem('userData_v11_' + targetKey, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
                     updateUI();
                     closeModal();
                     alert("✅ Đã lưu thay đổi thành công!");
                 }
                 reader.readAsDataURL(file);
             } else {
-                localStorage.setItem('userData_v10_' + targetKey, JSON.stringify(siteData));
-                localStorage.setItem('userData_v11_' + targetKey, JSON.stringify(siteData));
+                localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
                 updateUI();
                 closeModal();
                 alert("✅ Đã lưu thay đổi thành công!");
@@ -769,8 +883,7 @@
                 reader.onload = function(e) {
                     siteData.avatar = e.target.result;
                     let targetKey = viewingUser.toLowerCase();
-                    localStorage.setItem('userData_v10_' + targetKey, JSON.stringify(siteData));
-                    localStorage.setItem('userData_v11_' + targetKey, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
                     updateUI();
                 }
                 reader.readAsDataURL(file);
