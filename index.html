@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Trang Cá Nhân Của Tôi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #030712;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Hiệu ứng sao băng TRẢI ĐẦU KHẮP BACKGROUND */
+        .shooting-stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .star {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: #fff;
+            box-shadow: 0 0 10px #fff, 0 0 20px #38bdf8, 0 0 30px #818cf8;
+            animation: shoot linear infinite;
+            opacity: 0;
+        }
+        @keyframes shoot {
+            0% { transform: translateY(-150px) translateX(0); opacity: 1; }
+            100% { transform: translateY(110vh) translateX(-300px); opacity: 0; }
+        }
+
+        /* Main Card Container */
+        .container {
+            position: relative;
+            z-index: 2;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            max-width: 520px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        @media(min-width: 650px) {
+            .container {
+                flex-direction: row;
+                align-items: flex-start;
+                max-width: 620px;
+            }
+        }
+
+        /* Phần bên trái: Avatar tròn bấm upload ảnh */
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .avatar {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: #38bdf8;
+            background-size: cover;
+            background-position: center;
+            border: 4px solid rgba(56, 189, 248, 0.6);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            transition: 0.3s;
+        }
+        .avatar:hover { transform: scale(1.05); border-color: #38bdf8; }
+        .avatar-hint { font-size: 11px; color: #94a3b8; margin-top: 10px; text-align: center; }
+        #avatar-input { display: none; }
+
+        /* Phần bên phải: Tên, Bio, Các nút Mạng xã hội */
+        .right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            text-align: center;
+        }
+        @media(min-width: 650px) { .right-section { text-align: left; } }
+
+        .name { font-size: 26px; font-weight: bold; margin-bottom: 6px; color: #f8fafc; }
+        .bio { font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.4; }
+
+        /* Danh sách nút mạng xã hội */
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(30, 41, 59, 0.85);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: 0.25s ease;
+        }
+        .btn:hover { background: #334155; transform: translateY(-2px); border-color: rgba(56, 189, 248, 0.4); }
+
+        /* Nút Chỉnh sửa trang web ở dưới cùng */
+        .edit-trigger {
+            margin-top: 20px;
+            background: transparent;
+            color: #64748b;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: 0.2s;
+        }
+        .edit-trigger:hover { color: #cbd5e1; }
+
+        /* Modal Admin Đăng nhập & Chỉnh sửa */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: #0f172a;
+            padding: 30px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid rgba(255,255,255,0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+        }
+        .modal-content h3 { margin-bottom: 20px; font-size: 20px; color: #38bdf8; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; margin-bottom: 6px; color: #94a3b8; font-weight: 500; }
+        .form-group input {
+            width: 100%; padding: 10px 14px; background: #1e293b; border: 1px solid #334155;
+            color: #fff; border-radius: 8px; font-size: 14px; outline: none;
+        }
+        .form-group input:focus { border-color: #38bdf8; }
+        .modal-btns { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .modal-btns button { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-save { background: #38bdf8; color: #0f172a; }
+        .btn-save:hover { background: #7dd3fc; }
+        .btn-close { background: #334155; color: #fff; }
+        .btn-close:hover { background: #475569; }
+    </style>
+</head>
+<body>
+
+    <!-- Hiệu ứng sao băng phủ kín màn hình -->
+    <div class="shooting-stars" id="starContainer"></div>
+
+    <!-- Thẻ phát nhạc nền tự động -->
+    <audio id="bgMusic" loop>
+        <source id="audioSource" src="" type="audio/mp3">
+    </audio>
+
+    <div class="container">
+        <!-- Bên trái: Ô tròn Avatar bấm để chọn ảnh -->
+        <div class="left-section" onclick="document.getElementById('avatar-input').click()">
+            <div class="avatar" id="avatarDisplay" style="background-image: url('https://via.placeholder.com/150')"></div>
+            <span class="avatar-hint">Bấm vào ảnh để đổi</span>
+            <input type="file" id="avatar-input" accept="image/*" onchange="previewAvatar(event)">
+        </div>
+
+        <!-- Bên phải: Tên, Bio, và các nút mạng xã hội -->
+        <div class="right-section">
+            <div class="name" id="displayName">Tên Của Bạn</div>
+            <div class="bio" id="displayBio">Tiểu sử hoặc châm ngôn sống của bạn ở đây...</div>
+            
+            <div class="links">
+                <a href="#" id="linkFb" class="btn" target="_blank">🌐 Facebook Cá Nhân</a>
+                <a href="#" id="linkTiktok" class="btn" target="_blank">🎵 Tiktok Chính Thức</a>
+                <a href="#" id="linkIg" class="btn" target="_blank">📸 Instagram Profile</a>
+            </div>
+
+            <button class="edit-trigger" onclick="openAdminModal()">⚙️ Chỉnh sửa trang web</button>
+        </div>
+    </div>
+
+    <!-- Bảng Modal Quản Trị (Admin) -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <!-- Form Đăng Nhập -->
+            <div id="loginSection">
+                <h3>🔒 Đăng Nhập Quản Trị</h3>
+                <div class="form-group">
+                    <label>Tài khoản Admin</label>
+                    <input type="text" id="usernameInput" placeholder="Nhập tên đăng nhập...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="passwordInput" placeholder="Nhập mật khẩu...">
+                </div>
+                <div class="modal-btns">
+                    <button class="btn-close" onclick="closeModal()">Hủy</button>
+                    <button class="btn-save" onclick="checkLogin()">Tiếp tục</button>
+                </div>
+            </div>
+
+            <!-- Form Chỉnh Sửa Thông Tin Sau Khi Đăng Nhập Đúng -->
+            <div id="editSection" style="display:none;">
+                <h3>🛠️ Cấu Hình Giao Diện Web</h3>
+                <div class="form-group">
+                    <label>Tên hiển thị</label>
+                    <input type="text" id="inputName">
+                </div>
+                <div class="form-group">
+                    <label>Tiểu sử (Bio)</label>
+                    <input type="text" id="inputBio">
+                </div>
+                <div class="form-group">
+                    <label>Đường dẫn Facebook</label>
+                    <input type="text" id="inputFb">
+                </div>
+                <div class="form-group">
+                    <label>Đường dẫn Tiktok</label>
+                    <input type="text" id="inputTiktok">
+                </div>
+                <div class="form-group">
+                    <label>Đường dẫn Instagram</label>
+                    <input type="text" id="inputIg">
+                </div>
+                <div class="form-group">
+                    <label>Tải lên tệp nhạc nền MP3 mới</label>
+                    <input type="file" id="inputMusic" accept="audio/mp3">
+                </div>
+                <div class="modal-btns">
+                    <button class="btn-close" onclick="closeModal()">Đóng</button>
+                    <button class="btn-save" onclick="saveChanges()">Lưu Lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. DANH SÁCH TÀI KHOẢN ADMIN (Thêm người dùng mới tại đây)
+        // ==========================================
+        const adminUsers = [
+            { user: "admin", pass: "123456" },
+            { user: "boss", pass: "admin666" },
+            // Sau này muốn thêm người dùng mới, chỉ cần thêm dòng mới vào đây theo mẫu:
+            // { user: "ten_nguoi_moi", pass: "mat_khau_moi" },
+        ];
+
+        // ==========================================
+        // 2. TẠO HIỆU ƯNG SAO BĂNG TRẢI ĐẦU KHẮP MÀN HÌNH
+        // ==========================================
+        const starContainer = document.getElementById('starContainer');
+        for (let i = 0; i < 35; i++) {
+            let star = document.createElement('div');
+            star.className = 'star';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            star.style.animationDelay = (Math.random() * 5) + 's';
+            starContainer.appendChild(star);
+        }
+
+        // ==========================================
+        // 3. QUẢN LÝ DỮ LIỆU & GIAO DIỆN WEB
+        // ==========================================
+        let siteData = JSON.parse(localStorage.getItem('siteData')) || {
+            name: "Tên Của Bạn",
+            bio: "Lập trình viên & Nhà sáng tạo nội dung",
+            fb: "https://facebook.com",
+            tiktok: "https://tiktok.com",
+            ig: "https://instagram.com",
+            avatar: "https://via.placeholder.com/150",
+            music: ""
+        };
+
+        function updateUI() {
+            document.getElementById('displayName').innerText = siteData.name;
+            document.getElementById('displayBio').innerText = siteData.bio;
+            document.getElementById('linkFb').href = siteData.fb;
+            document.getElementById('linkTiktok').href = siteData.tiktok;
+            document.getElementById('linkIg').href = siteData.ig;
+            if(siteData.avatar) document.getElementById('avatarDisplay').style.backgroundImage = `url('${siteData.avatar}')`;
+            
+            if(siteData.music) {
+                let musicEl = document.getElementById('bgMusic');
+                musicEl.src = siteData.music;
+                // Tự động phát nhạc khi vào trang (nếu trình duyệt cho phép)
+                musicEl.play().catch(e => console.log("Trình duyệt chặn autoplay cho đến khi có tương tác đầu tiên."));
+            }
+        }
+        updateUI();
+
+        // Tự động kích hoạt phát nhạc ngay khi người dùng chạm/click bất cứ đâu trên màn hình lần đầu tiên
+        document.addEventListener('click', function() {
+            let musicEl = document.getElementById('bgMusic');
+            if(musicEl.src && musicEl.paused) {
+                musicEl.play().catch(e => {});
+            }
+        }, { once: true });
+
+        // ==========================================
+        // 4. XỬ LÝ ĐĂNG NHẬP ADMIN & MODAL
+        // ==========================================
+        function openAdminModal() {
+            document.getElementById('adminModal').style.display = 'flex';
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('editSection').style.display = 'none';
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function closeModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function checkLogin() {
+            let u = document.getElementById('usernameInput').value.trim();
+            let p = document.getElementById('passwordInput').value.trim();
+
+            // Kiểm tra xem tài khoản và mật khẩu có khớp với bất kỳ tài khoản nào trong mảng adminUsers không
+            let isValidUser = adminUsers.some(account => account.user === u && account.pass === p);
+
+            if(isValidUser) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('editSection').style.display = 'block';
+                
+                // Nạp dữ liệu hiện tại vào các ô input trong bảng chỉnh sửa
+                document.getElementById('inputName').value = siteData.name;
+                document.getElementById('inputBio').value = siteData.bio;
+                document.getElementById('inputFb').value = siteData.fb;
+                document.getElementById('inputTiktok').value = siteData.tiktok;
+                document.getElementById('inputIg').value = siteData.ig;
+            } else {
+                alert("❌ Sai tài khoản hoặc mật khẩu quản trị!");
+            }
+        }
+
+        // ==========================================
+        // 5. LƯU THAY ĐỔI & UPLOAD FILE (ẢNH / NHẠC)
+        // ==========================================
+        function saveChanges() {
+            siteData.name = document.getElementById('inputName').value;
+            siteData.bio = document.getElementById('inputBio').value;
+            siteData.fb = document.getElementById('inputFb').value;
+            siteData.tiktok = document.getElementById('inputTiktok').value;
+            siteData.ig = document.getElementById('inputIg').value;
+
+            let musicFile = document.getElementById('inputMusic').files[0];
+            if(musicFile) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    siteData.music = e.target.result;
+                    localStorage.setItem('siteData', JSON.stringify(siteData));
+                    updateUI();
+                    closeModal();
+                    alert("✅ Đã cập nhật thông tin và nhạc nền thành công!");
+                }
+                reader.readAsDataURL(musicFile);
+            } else {
+                localStorage.setItem('siteData', JSON.stringify(siteData));
+                updateUI();
+                closeModal();
+                alert("✅ Đã cập nhật thông tin thành công!");
+            }
+        }
+
+        function previewAvatar(event) {
+            let file = event.target.files[0];
+            if(file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    siteData.avatar = e.target.result;
+                    localStorage.setItem('siteData', JSON.stringify(siteData));
+                    updateUI();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>
