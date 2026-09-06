@@ -30,13 +30,24 @@
             display: none;
         }
 
+        /* Nền mờ nhẹ nhàng, không bị đen xì */
         .bg-overlay {
             position: fixed;
             top: 0; left: 0; 
             width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.15);
             z-index: -1;
             pointer-events: none;
+        }
+
+        /* Canvas vẽ sao băng mặc định */
+        #starCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: -3;
+            pointer-events: none;
+            background: #030712;
         }
 
         .top-right-bar {
@@ -47,11 +58,11 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(10px);
             padding: 8px 14px;
             border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             font-size: 13px;
         }
 
@@ -266,8 +277,9 @@
 </head>
 <body>
 
+    <canvas id="starCanvas"></canvas>
     <div id="bgImage"></div>
-    <video id="bgVideo" autoplay muted loop playsinline>
+    <video id="bgVideo" autoplay muted loop playsinline style="display:none;">
         <source src="" type="video/mp4" id="videoSource">
     </video>
     <div class="bg-overlay"></div>
@@ -296,7 +308,7 @@
         </div>
     </div>
 
-    <!-- Modal Modal Đăng nhập / Cấu hình -->
+    <!-- Modal Đăng nhập / Cấu hình -->
     <div class="modal" id="authModal">
         <div class="modal-content">
             <div id="loginForm">
@@ -365,6 +377,12 @@
                     <button class="btn-save" style="width:100%; margin-top:5px; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Xác Nhận Cấp VIP</button>
                 </div>
 
+                <!-- ĐỔI ẢNH ĐẠI DIỆN TRONG CẤU HÌNH -->
+                <div class="form-group">
+                    <label>Đổi Ảnh Đại Diện (Avatar)</label>
+                    <input type="file" id="inputModalAvatar" accept="image/*" style="padding: 6px; background: #1e293b; cursor: pointer;">
+                </div>
+
                 <div class="form-group">
                     <label>Tên hiển thị</label>
                     <input type="text" id="inputName">
@@ -425,6 +443,73 @@
     </div>
 
     <script>
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        let stars = [];
+        for(let i=0; i<100; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 1.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.05 + 0.01
+            });
+        }
+
+        let shootingStars = [];
+        function createShootingStar() {
+            if(Math.random() < 0.04) {
+                shootingStars.push({
+                    x: Math.random() * width,
+                    y: 0,
+                    length: Math.random() * 80 + 40,
+                    speed: Math.random() * 10 + 6,
+                    angle: Math.PI / 4
+                });
+            }
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "#ffffff";
+            stars.forEach(s => {
+                ctx.globalAlpha = s.alpha;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                ctx.fill();
+                s.alpha += s.speed;
+                if(s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+            });
+
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.lineWidth = 2;
+            shootingStars.forEach((ss, index) => {
+                ctx.beginPath();
+                ctx.moveTo(ss.x, ss.y);
+                ctx.lineTo(ss.x - ss.length * Math.cos(ss.angle), ss.y - ss.length * Math.sin(ss.angle));
+                ctx.stroke();
+
+                ss.x += ss.speed * Math.cos(ss.angle);
+                ss.y += ss.speed * Math.sin(ss.angle);
+
+                if(ss.x > width || ss.y > height) {
+                    shootingStars.splice(index, 1);
+                }
+            });
+
+            createShootingStar();
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
+
         let usersDB = [
             { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999999999 }
         ];
@@ -443,7 +528,6 @@
 
         let loggedInUser = localStorage.getItem('loggedInUser_v15') || "Mrwenben";
 
-        // TỰ ĐỘNG HẠ CẤP NẾU HẾT HẠN
         function checkVipExpiration() {
             let now = new Date().getTime();
             let updated = false;
@@ -513,7 +597,6 @@
             let role = getUserRole(viewingUser);
             let container = document.getElementById('mainContainer');
 
-            // NẾU CỐ TÌNH VÀO LINK VIP NHƯNG TÀI KHOẢN ĐÓ ĐÃ HẾT HẠN (VỀ BASIC) HOẶC BỊ XÓA VÀ KHÔNG PHẢI OWNER
             if (viewingUser.toLowerCase() !== "mrwenben" && role !== 'vip' && role !== 'owner') {
                 container.innerHTML = `
                     <div style="text-align: center; width: 100%;">
@@ -555,10 +638,10 @@
                 avatarHintText.style.display = "none";
             }
 
+            // ĐÃ BỎ HẲN CHỮ "XIN CHÀO", GỌN GÀNG SẠCH SẼ
             let topRightBar = document.getElementById('topRightBar');
             let htmlBar = "";
             if(loggedInUser) {
-                htmlBar += `<span>Xin chào: <b>${loggedInUser}</b></span>`;
                 if(viewingUser.toLowerCase() !== loggedInUser.toLowerCase()) {
                     htmlBar += `<button onclick="goToMyPage()">Trang của tôi</button><span>/</span>`;
                 }
@@ -591,10 +674,10 @@
             let bgVal = siteData.bg;
             let videoEl = document.getElementById('bgVideo');
             let imageEl = document.getElementById('bgImage');
-            
-            let defaultVideoUrl = "https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-background-1610-large.mp4";
+            let canvasEl = document.getElementById('starCanvas');
 
             if(bgVal === "CUSTOM_FILE") {
+                canvasEl.style.display = "none";
                 if(siteData.customFile) {
                     if(siteData.customFileType && siteData.customFileType.startsWith('video')) {
                         imageEl.style.display = "none";
@@ -611,12 +694,9 @@
                     imageEl.style.display = "none";
                 }
             } else {
+                canvasEl.style.display = "block";
                 imageEl.style.display = "none";
-                videoEl.style.display = "block";
-                if(videoEl.src !== defaultVideoUrl) {
-                    videoEl.src = defaultVideoUrl;
-                    videoEl.play().catch(e => {});
-                }
+                videoEl.style.display = "none";
             }
 
             if(siteData.music) {
@@ -632,7 +712,7 @@
         window.addEventListener('hashchange', function() {
             viewingUser = getTargetPageUser();
             siteData = getUserData(viewingUser);
-            location.reload(); // Reload nhẹ khi đổi hash để reset bố cục view chính xác
+            location.reload();
         });
 
         function goToMyPage() {
@@ -770,6 +850,7 @@
             document.getElementById('inputBio').value = siteData.bio;
             document.getElementById('inputMusicUrl').value = siteData.music || "";
             document.getElementById('inputBgSelect').value = siteData.bg || "VID_SHOOTING";
+            document.getElementById('inputModalAvatar').value = ""; 
             
             onBgSelectChange();
 
@@ -783,7 +864,7 @@
             navigator.clipboard.writeText(linkText).then(() => {
                 alert("📋 Đã sao chép đường link web riêng của bạn!");
             }).catch(err => {
-                alert("❌ Không thể sao chép tự động, hãy bôi đen và copy thủ công nhé!");
+                alert("❌ Không thể sao chép tự động!");
             });
         }
 
@@ -854,25 +935,41 @@
                 siteData.links.push({ name: n, url: u });
             }
 
+            let modalAvatarInput = document.getElementById('inputModalAvatar');
             let fileInput = document.getElementById('inputCustomFile');
             let targetKey = viewingUser.toLowerCase();
-            if(siteData.bg === 'CUSTOM_FILE' && fileInput.files && fileInput.files[0]) {
-                let file = fileInput.files[0];
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    siteData.customFile = e.target.result;
-                    siteData.customFileType = file.type;
+
+            let saveAllData = () => {
+                if(siteData.bg === 'CUSTOM_FILE' && fileInput.files && fileInput.files[0]) {
+                    let file = fileInput.files[0];
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        siteData.customFile = e.target.result;
+                        siteData.customFileType = file.type;
+                        localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
+                        updateUI();
+                        closeModal();
+                        alert("✅ Đã lưu thay đổi thành công!");
+                    }
+                    reader.readAsDataURL(file);
+                } else {
                     localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
                     updateUI();
                     closeModal();
                     alert("✅ Đã lưu thay đổi thành công!");
                 }
-                reader.readAsDataURL(file);
+            };
+
+            if(modalAvatarInput.files && modalAvatarInput.files[0]) {
+                let avatarFile = modalAvatarInput.files[0];
+                let avtReader = new FileReader();
+                avtReader.onload = function(e) {
+                    siteData.avatar = e.target.result;
+                    saveAllData();
+                }
+                avtReader.readAsDataURL(avatarFile);
             } else {
-                localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
-                updateUI();
-                closeModal();
-                alert("✅ Đã lưu thay đổi thành công!");
+                saveAllData();
             }
         }
 
