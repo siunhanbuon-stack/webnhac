@@ -21,7 +21,6 @@
             transition: background 0.5s ease;
         }
 
-        /* Lớp phủ tối nhẹ để nổi bật chữ */
         .bg-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -30,7 +29,6 @@
             pointer-events: none;
         }
 
-        /* Main Container chìm vào background */
         .container {
             position: relative;
             z-index: 2;
@@ -51,7 +49,6 @@
             }
         }
 
-        /* Avatar không viền */
         .left-section {
             display: flex;
             flex-direction: column;
@@ -72,7 +69,6 @@
         .avatar-hint { font-size: 11px; color: #cbd5e1; margin-top: 8px; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
         #avatar-input { display: none; }
 
-        /* Thông tin bên phải */
         .right-section {
             flex: 1;
             display: flex;
@@ -93,7 +89,6 @@
 
         .name { font-size: 26px; font-weight: bold; color: #f8fafc; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
         
-        /* Huy hiệu Owner / VIP / Basic */
         .badge {
             font-size: 10px;
             font-weight: bold;
@@ -108,7 +103,6 @@
 
         .bio { font-size: 14px; color: #e2e8f0; margin-bottom: 20px; line-height: 1.4; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
 
-        /* Các nút mạng xã hội */
         .links {
             display: flex;
             flex-direction: column;
@@ -133,7 +127,6 @@
         }
         .btn:hover { background: rgba(30, 41, 59, 0.85); transform: translateY(-2px); border-color: rgba(56, 189, 248, 0.6); }
 
-        /* Nút Đăng nhập/Đăng ký góc phải phía trên / dưới */
         .nav-actions {
             display: flex;
             gap: 15px;
@@ -154,7 +147,6 @@
         }
         .action-link:hover { color: #fff; }
 
-        /* Modal Quản trị */
         .modal {
             display: none;
             position: fixed;
@@ -222,8 +214,7 @@
             </div>
             <div class="bio" id="displayBio">Chào mừng bạn đến với trang cá nhân của tôi!</div>
             
-            <div class="links" id="linksContainer">
-                </div>
+            <div class="links" id="linksContainer"></div>
 
             <div class="nav-actions">
                 <button class="action-link" onclick="openAuthModal('login')">🔑 Đăng nhập</button>
@@ -298,8 +289,7 @@
                         <option value="5">5 Link</option>
                     </select>
                 </div>
-                <div id="dynamicLinkInputs">
-                    </div>
+                <div id="dynamicLinkInputs"></div>
                 <div class="form-group">
                     <label>Chọn Background Cute / Động</label>
                     <select id="inputBgSelect">
@@ -323,17 +313,25 @@
     </div>
 
     <script>
-        // Danh sách tài khoản lưu trữ chung
-        let usersDB = JSON.parse(localStorage.getItem('usersDB')) || [
+        // Ép buộc làm mới danh sách tài khoản chuẩn xác nhất
+        let usersDB = [
             { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner" }
         ];
+        
+        let savedUsers = localStorage.getItem('usersDB_v2');
+        if (savedUsers) {
+            try {
+                let parsed = JSON.parse(savedUsers);
+                // Đảm bảo tài khoản Mrwenben luôn tồn tại và đúng quyền owner
+                if(!parsed.some(u => u.user === "Mrwenben")) {
+                    parsed.unshift({ user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner" });
+                }
+                usersDB = parsed;
+            } catch(e) {}
+        }
+        localStorage.setItem('usersDB_v2', JSON.stringify(usersDB));
 
-        let loggedInUser = localStorage.getItem('loggedInUser') || "Mrwenben";
-
-        // Đảm bảo tài khoản Mrwenben luôn là owner tối cao
-        let ownerAcc = usersDB.find(u => u.user === "Mrwenben");
-        if(ownerAcc) { ownerAcc.role = "owner"; } 
-        else { usersDB.unshift({ user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner" }); }
+        let loggedInUser = localStorage.getItem('loggedInUser_v2') || "Mrwenben";
 
         function getUserRole(username) {
             let acc = usersDB.find(u => u.user === username);
@@ -353,7 +351,7 @@
                 music: "",
                 bg: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1994&auto=format&fit=crop"
             };
-            let saved = localStorage.getItem('userData_' + username);
+            let saved = localStorage.getItem('userData_v2_' + username);
             return saved ? JSON.parse(saved) : defaultData;
         }
 
@@ -361,9 +359,8 @@
 
         function updateUI() {
             let role = getUserRole(loggedInUser);
-            
-            // Cập nhật huy hiệu
             let badgeEl = document.getElementById('userBadge');
+            
             if(role === 'owner') {
                 badgeEl.innerText = "OWNER";
                 badgeEl.className = "badge badge-owner";
@@ -378,7 +375,6 @@
             document.getElementById('displayName').innerText = siteData.name;
             document.getElementById('displayBio').innerText = siteData.bio;
             
-            // Render links
             let linksContainer = document.getElementById('linksContainer');
             linksContainer.innerHTML = "";
             if(siteData.links && siteData.links.length > 0) {
@@ -394,7 +390,6 @@
 
             if(siteData.avatar) document.getElementById('avatarDisplay').style.backgroundImage = `url('${siteData.avatar}')`;
             
-            // Background
             let bgVal = siteData.bg;
             if(bgVal === 'VIP_KITTY') {
                 document.body.style.backgroundImage = "url('https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=1920&auto=format&fit=crop')";
@@ -406,7 +401,6 @@
                 document.body.style.backgroundImage = `url('${bgVal}')`;
             }
 
-            // Nhạc nền phát ngay lập tức
             if(siteData.music) {
                 let musicEl = document.getElementById('bgMusic');
                 if(musicEl.src !== siteData.music) {
@@ -442,7 +436,7 @@
 
             if(found) {
                 loggedInUser = u;
-                localStorage.setItem('loggedInUser', u);
+                localStorage.setItem('loggedInUser_v2', u);
                 siteData = getUserData(u);
                 updateUI();
                 openEditForm();
@@ -466,10 +460,10 @@
             }
 
             usersDB.push({ user: u, pass: p, role: "basic" });
-            localStorage.setItem('usersDB', JSON.stringify(usersDB));
+            localStorage.setItem('usersDB_v2', JSON.stringify(usersDB));
             
             loggedInUser = u;
-            localStorage.setItem('loggedInUser', u);
+            localStorage.setItem('loggedInUser_v2', u);
             siteData = getUserData(u);
             updateUI();
             
@@ -487,7 +481,6 @@
             let ownerPanel = document.getElementById('ownerControlPanel');
             ownerPanel.style.display = (role === 'owner') ? 'block' : 'none';
 
-            // Ẩn/Hiện background VIP cho user thường
             let vipOptions = document.querySelectorAll('.vip-bg-option');
             vipOptions.forEach(opt => {
                 opt.style.display = (role === 'basic') ? 'none' : 'block';
@@ -526,7 +519,7 @@
             let targetAcc = usersDB.find(u => u.user === targetName);
             if(targetAcc) {
                 targetAcc.role = 'vip';
-                localStorage.setItem('usersDB', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v2', JSON.stringify(usersDB));
                 alert(`✅ Đã nâng cấp tài khoản ${targetName} lên VIP thành công!`);
             } else {
                 alert("❌ Không tìm thấy tên tài khoản này!");
@@ -537,7 +530,6 @@
             let role = getUserRole(loggedInUser);
             let chosenBg = document.getElementById('inputBgSelect').value;
 
-            // Chặn user basic chọn bg vip
             if(role === 'basic' && (chosenBg.includes('VIP'))) {
                 alert("❌ Tài khoản BASIC không được sử dụng Background VIP này!");
                 return;
@@ -556,7 +548,7 @@
                 siteData.links.push({ name: n, url: u });
             }
 
-            localStorage.setItem('userData_' + loggedInUser, JSON.stringify(siteData));
+            localStorage.setItem('userData_v2_' + loggedInUser, JSON.stringify(siteData));
             updateUI();
             closeModal();
             alert("✅ Đã lưu thay đổi thành công!");
@@ -568,7 +560,7 @@
                 let reader = new FileReader();
                 reader.onload = function(e) {
                     siteData.avatar = e.target.result;
-                    localStorage.setItem('userData_' + loggedInUser, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v2_' + loggedInUser, JSON.stringify(siteData));
                     updateUI();
                 }
                 reader.readAsDataURL(file);
