@@ -30,7 +30,6 @@
             display: none;
         }
 
-        /* Nền mờ nhẹ nhàng, không bị đen xì */
         .bg-overlay {
             position: fixed;
             top: 0; left: 0; 
@@ -40,7 +39,6 @@
             pointer-events: none;
         }
 
-        /* Canvas vẽ sao băng mặc định */
         #starCanvas {
             position: fixed;
             top: 0; left: 0;
@@ -92,12 +90,46 @@
             margin-top: 40px;
         }
 
-        @media(min-width: 600px) {
-            .container {
-                flex-direction: row;
-                align-items: flex-start;
-                max-width: 600px;
-            }
+        /* Layout các kiểu hiển thị */
+        .container.layout-center {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .container.layout-center .right-section {
+            align-items: center;
+            text-align: center;
+        }
+        .container.layout-center .name-wrapper {
+            justify-content: center;
+        }
+
+        .container.layout-left {
+            flex-direction: row;
+            align-items: center;
+            text-align: left;
+            max-width: 600px;
+        }
+        .container.layout-left .right-section {
+            align-items: flex-start;
+            text-align: left;
+        }
+        .container.layout-left .name-wrapper {
+            justify-content: flex-start;
+        }
+
+        .container.layout-right {
+            flex-direction: row-reverse;
+            align-items: center;
+            text-align: left;
+            max-width: 600px;
+        }
+        .container.layout-right .right-section {
+            align-items: flex-start;
+            text-align: left;
+        }
+        .container.layout-right .name-wrapper {
+            justify-content: flex-start;
         }
 
         .left-section {
@@ -118,7 +150,6 @@
             transition: 0.3s;
         }
         .avatar:hover { transform: scale(1.05); }
-        .avatar-hint { font-size: 11px; color: #cbd5e1; margin-top: 8px; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
         #avatar-input { display: none; }
 
         .right-section {
@@ -126,19 +157,15 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            text-align: center;
         }
-        @media(min-width: 600px) { .right-section { text-align: left; } }
 
         .name-wrapper {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
             margin-bottom: 6px;
             flex-wrap: wrap;
         }
-        @media(min-width: 600px) { .name-wrapper { justify-content: flex-start; } }
 
         .name { font-size: 26px; font-weight: bold; color: #f8fafc; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
         
@@ -153,7 +180,7 @@
         .badge-owner { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
         .badge-vip { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6); }
 
-        .bio { font-size: 14px; color: #e2e8f0; margin-bottom: 20px; line-height: 1.4; text-shadow: 0 1px 5px rgba(0,0,0,0.9); }
+        .bio { font-size: 14px; color: #e2e8f0; margin-bottom: 20px; line-height: 1.4; text-shadow: 0 1px 5px rgba(0,0,0,0.9); width: 100%; }
 
         .links {
             display: flex;
@@ -290,10 +317,9 @@
 
     <div class="top-right-bar" id="topRightBar"></div>
 
-    <div class="container" id="mainContainer">
+    <div class="container layout-center" id="mainContainer">
         <div class="left-section" onclick="if(canEditCurrentPage()) document.getElementById('avatar-input').click()">
             <div class="avatar" id="avatarDisplay" style="background-image: url('https://via.placeholder.com/150')"></div>
-            <span class="avatar-hint" id="avatarHintText">Bấm đổi ảnh</span>
             <input type="file" id="avatar-input" accept="image/*" onchange="previewAvatar(event)">
         </div>
 
@@ -377,7 +403,16 @@
                     <button class="btn-save" style="width:100%; margin-top:5px; background:#f59e0b; color:#fff;" onclick="upgradeToVip()">Xác Nhận Cấp VIP</button>
                 </div>
 
-                <!-- ĐỔI ẢNH ĐẠI DIỆN TRONG CẤU HÌNH -->
+                <!-- TÙY CHỌN 3 KIỂU HIỂN THỊ (Dành cho VIP và Owner) -->
+                <div class="form-group" id="layoutConfigGroup" style="display:none;">
+                    <label>Kiểu hiển thị (Ảnh và Tên)</label>
+                    <select id="inputLayout">
+                        <option value="left">1. Ảnh bên trái, Tên bên phải</option>
+                        <option value="center">2. Giữa (Ảnh trên, Tên dưới)</option>
+                        <option value="right">3. Ảnh bên phải, Tên bên trái</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label>Đổi Ảnh Đại Diện (Avatar)</label>
                     <input type="file" id="inputModalAvatar" accept="image/*" style="padding: 6px; background: #1e293b; cursor: pointer;">
@@ -393,7 +428,7 @@
                 </div>
 
                 <div class="form-group" id="badgeConfigGroup" style="display:none;">
-                    <label>Hiển thị Huy hiệu Owner/VIP ở giữa?</label>
+                    <label>Hiển thị Huy hiệu Owner/VIP?</label>
                     <select id="inputShowBadge">
                         <option value="yes">Hiển thị</option>
                         <option value="no">Ẩn đi</option>
@@ -514,7 +549,7 @@
             { user: "Mrwenben", pass: "Mrwenben0707@.@", role: "owner", expire: 999999999999 }
         ];
         
-        let savedUsers = localStorage.getItem('usersDB_v15');
+        let savedUsers = localStorage.getItem('usersDB_v16');
         if (savedUsers) {
             try {
                 let parsed = JSON.parse(savedUsers);
@@ -524,9 +559,9 @@
                 usersDB = parsed;
             } catch(e) {}
         }
-        localStorage.setItem('usersDB_v15', JSON.stringify(usersDB));
+        localStorage.setItem('usersDB_v16', JSON.stringify(usersDB));
 
-        let loggedInUser = localStorage.getItem('loggedInUser_v15') || "Mrwenben";
+        let loggedInUser = localStorage.getItem('loggedInUser_v16') || "Mrwenben";
 
         function checkVipExpiration() {
             let now = new Date().getTime();
@@ -539,7 +574,7 @@
                 }
             });
             if(updated) {
-                localStorage.setItem('usersDB_v15', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v16', JSON.stringify(usersDB));
             }
         }
         checkVipExpiration();
@@ -576,9 +611,10 @@
                 bg: "VID_SHOOTING",
                 customFile: "",
                 customFileType: "",
-                showBadge: "yes"
+                showBadge: "yes",
+                layout: "center"
             };
-            let saved = localStorage.getItem('userData_v15_' + username.toLowerCase());
+            let saved = localStorage.getItem('userData_v16_' + username.toLowerCase());
             return saved ? JSON.parse(saved) : defaultData;
         }
 
@@ -611,6 +647,15 @@
                 return;
             }
 
+            // Thiết lập class Layout cho Container
+            container.className = "container";
+            let currentLayout = siteData.layout || "center";
+            if (role === 'owner' || role === 'vip') {
+                container.classList.add("layout-" + currentLayout);
+            } else {
+                container.classList.add("layout-center"); // Tài khoản basic luôn để giữa
+            }
+
             let badgeEl = document.getElementById('userBadge');
             if (role === 'owner' || role === 'vip') {
                 if (role === 'owner') {
@@ -630,15 +675,6 @@
                 badgeEl.style.display = "none";
             }
 
-            let avatarHintText = document.getElementById('avatarHintText');
-            if(canEditCurrentPage()) {
-                avatarHintText.style.display = "block";
-                avatarHintText.innerText = "Bấm đổi ảnh";
-            } else {
-                avatarHintText.style.display = "none";
-            }
-
-            // ĐÃ BỎ HẲN CHỮ "XIN CHÀO", GỌN GÀNG SẠCH SẼ
             let topRightBar = document.getElementById('topRightBar');
             let htmlBar = "";
             if(loggedInUser) {
@@ -747,7 +783,7 @@
             if(found) {
                 checkVipExpiration();
                 loggedInUser = found.user;
-                localStorage.setItem('loggedInUser_v15', found.user);
+                localStorage.setItem('loggedInUser_v16', found.user);
                 window.location.hash = "#" + found.user;
                 viewingUser = found.user;
                 siteData = getUserData(found.user);
@@ -761,7 +797,7 @@
 
         function handleLogout() {
             loggedInUser = "";
-            localStorage.removeItem('loggedInUser_v15');
+            localStorage.removeItem('loggedInUser_v16');
             window.location.hash = "#Mrwenben";
             viewingUser = "Mrwenben";
             siteData = getUserData("Mrwenben");
@@ -784,10 +820,10 @@
             }
 
             usersDB.push({ user: u, pass: p, role: "basic", expire: 0 });
-            localStorage.setItem('usersDB_v15', JSON.stringify(usersDB));
+            localStorage.setItem('usersDB_v16', JSON.stringify(usersDB));
             
             loggedInUser = u;
-            localStorage.setItem('loggedInUser_v15', u);
+            localStorage.setItem('loggedInUser_v16', u);
             window.location.hash = "#" + u;
             viewingUser = u;
             siteData = getUserData(u);
@@ -838,11 +874,15 @@
                 vipLinkSection.style.display = 'none';
             }
 
+            let layoutConfigGroup = document.getElementById('layoutConfigGroup');
             let badgeConfigGroup = document.getElementById('badgeConfigGroup');
             if (viewingRole === 'owner' || viewingRole === 'vip') {
+                layoutConfigGroup.style.display = 'block';
                 badgeConfigGroup.style.display = 'block';
+                document.getElementById('inputLayout').value = siteData.layout || "center";
                 document.getElementById('inputShowBadge').value = siteData.showBadge || "yes";
             } else {
+                layoutConfigGroup.style.display = 'none';
                 badgeConfigGroup.style.display = 'none';
             }
 
@@ -909,7 +949,7 @@
                 targetAcc.role = 'vip';
                 let now = new Date().getTime();
                 targetAcc.expire = now + (days * 24 * 60 * 60 * 1000);
-                localStorage.setItem('usersDB_v15', JSON.stringify(usersDB));
+                localStorage.setItem('usersDB_v16', JSON.stringify(usersDB));
                 alert(`✅ Đã cấp VIP thành công cho tài khoản ${targetAcc.user} trong ${days} ngày!`);
             } else {
                 alert("❌ Không tìm thấy tên tài khoản này trong hệ thống!");
@@ -924,6 +964,7 @@
 
             let targetRole = getUserRole(viewingUser);
             if (targetRole === 'owner' || targetRole === 'vip') {
+                siteData.layout = document.getElementById('inputLayout').value;
                 siteData.showBadge = document.getElementById('inputShowBadge').value;
             }
 
@@ -946,14 +987,14 @@
                     reader.onload = function(e) {
                         siteData.customFile = e.target.result;
                         siteData.customFileType = file.type;
-                        localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
+                        localStorage.setItem('userData_v16_' + targetKey, JSON.stringify(siteData));
                         updateUI();
                         closeModal();
                         alert("✅ Đã lưu thay đổi thành công!");
                     }
                     reader.readAsDataURL(file);
                 } else {
-                    localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v16_' + targetKey, JSON.stringify(siteData));
                     updateUI();
                     closeModal();
                     alert("✅ Đã lưu thay đổi thành công!");
@@ -980,7 +1021,7 @@
                 reader.onload = function(e) {
                     siteData.avatar = e.target.result;
                     let targetKey = viewingUser.toLowerCase();
-                    localStorage.setItem('userData_v15_' + targetKey, JSON.stringify(siteData));
+                    localStorage.setItem('userData_v16_' + targetKey, JSON.stringify(siteData));
                     updateUI();
                 }
                 reader.readAsDataURL(file);
